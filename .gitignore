@@ -1,0 +1,47 @@
+# Node
+node_modules/
+npm-debug.log*
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+
+# Vite / build
+dist/
+.build/
+*.local
+
+# TypeScript
+*.tsbuildinfo
+
+# env
+.env
+.env.*.local
+.env.local
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Optional: local env files
+.env
+
+# Coverage
+coverage/
+
+# Test output
+jest-stare/
+
+# Misc
+.vite
