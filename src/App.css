@@ -1,0 +1,200 @@
+/* App global styles used by Home page */
+:root {
+	--bg: #f6f8fb;
+	--page-bg: #ffffff;
+	--text: #0f172a;
+	--muted: #6b7280;
+	--card-border: rgba(15,23,42,0.04);
+	--accent-1: #60a5fa;
+	--accent-2: #7c3aed;
+}
+
+body {
+ 		background: var(--bg);
+ 		color: var(--text);
+ 		font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  		transition: background-color .18s ease, color .18s ease;
+}
+
+.hero-card {
+	width: 180px;
+	border: 1px solid var(--card-border);
+	background: var(--page-bg);
+}
+
+.avatar {
+	width: 72px;
+	height: 72px;
+	border-radius: 50%;
+	background: linear-gradient(135deg,#60a5fa,#7c3aed);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: white;
+	font-weight: 700;
+	font-size: 1.25rem;
+	margin: 0 auto;
+	box-shadow: 0 6px 18px rgba(99,102,241,0.12);
+}
+
+.skill-badge {
+	padding: 0.45rem 0.9rem;
+	border-radius: 999px;
+	box-shadow: 0 6px 18px rgba(2,6,23,0.04);
+	background: var(--page-bg);
+	border: 1px solid var(--card-border);
+	font-weight: 600;
+	color: var(--text);
+}
+
+.hover-card {
+	transition: transform .18s ease, box-shadow .18s ease;
+}
+.hover-card:hover {
+	transform: translateY(-6px);
+	box-shadow: 0 12px 36px rgba(15,23,42,0.08);
+}
+
+/* Navbar styling uses variables so it responds to theme */
+.app-navbar {
+  background: var(--page-bg);
+  border-bottom: 1px solid var(--card-border);
+}
+
+.text-muted {
+  color: var(--muted) !important;
+}
+
+/* Active nav link styling for clarity */
+.nav-link.active {
+	font-weight: 700;
+	color: var(--accent-1) !important;
+	border-bottom: 2px solid transparent;
+}
+
+/* Make nav links readable in dark mode and add small hover/focus transition */
+.nav-link {
+	color: var(--text) !important;
+	transition: color .12s ease, background-color .12s ease;
+}
+.nav-link:hover, .nav-link:focus {
+	color: var(--accent-1) !important;
+}
+
+/* Brand avatar and text */
+.brand-avatar {
+	width: 36px;
+	height: 36px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 6px;
+	background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+	color: white;
+	font-weight: 700;
+	box-shadow: 0 6px 18px rgba(2,6,23,0.06);
+}
+.brand-text {
+	color: var(--text);
+	font-weight: 600;
+}
+
+[data-theme="dark"] .brand-avatar {
+	box-shadow: 0 6px 18px rgba(2,6,23,0.12);
+}
+
+/* Keyboard focus style for skill pills */
+.skill-badge:focus {
+	outline: 3px solid rgba(96,165,250,0.18);
+	outline-offset: 2px;
+}
+
+/* Make skill pills appear like badges while remaining keyboard-accessible buttons */
+.skill-badge {
+	border: none; /* visual border handled via earlier rules */
+	background: var(--page-bg);
+	padding: 0.45rem 0.9rem;
+	cursor: pointer;
+}
+
+.skill-badge:focus {
+	box-shadow: 0 0 0 4px rgba(96,165,250,0.08);
+}
+
+/* Card title link: looks like plain text but is keyboard-focusable */
+.card-title-link {
+	color: inherit;
+	text-decoration: none;
+}
+.card-title-link:focus,
+.card-title-link:hover {
+	text-decoration: underline;
+}
+
+/* Ensure card titles have strong contrast in dark mode */
+.card-title-link {
+	color: var(--text);
+}
+
+/* Small spacing for language toggle buttons in the navbar */
+.btn-group .btn {
+	padding: 0.25rem 0.5rem;
+}
+
+.fade-in {
+	animation: fadeIn .6s ease both;
+}
+
+.slide-up {
+	animation: slideUp .6s ease both;
+}
+
+@keyframes fadeIn {
+	from { opacity: 0; transform: translateY(6px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+	from { opacity: 0; transform: translateY(12px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsiveness tweaks */
+@media (prefers-reduced-motion: reduce) {
+	.hover-card, .fade-in, .slide-up {
+		transition: none !important;
+		animation: none !important;
+	}
+}
+
+/* Dark theme overrides */
+[data-theme="dark"] {
+	--bg: #0b1220;
+	--page-bg: #061025;
+	--text: #e6eef8;
+	--muted: #9aa6bf;
+	--card-border: rgba(255,255,255,0.04);
+	--accent-1: #3b82f6;
+	--accent-2: #8b5cf6;
+}
+
+[data-theme="dark"] body {
+	background: var(--bg);
+	color: var(--text);
+}
+
+[data-theme="dark"] .hero-card {
+	background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+	border: 1px solid var(--card-border);
+}
+
+[data-theme="dark"] .skill-badge {
+	background: rgba(255,255,255,0.03);
+	border: 1px solid rgba(255,255,255,0.04);
+	color: var(--text);
+}
+
+[data-theme="dark"] .hover-card {
+	background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+	border: 1px solid var(--card-border);
+}
