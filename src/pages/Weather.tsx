@@ -75,7 +75,7 @@ export default function WeatherPage() {
       <div className="mb-3 d-flex gap-2">
         <input
           className="form-control"
-          placeholder="Enter city, e.g. London"
+          placeholder={t("weather_enter_city")}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => {
@@ -83,7 +83,7 @@ export default function WeatherPage() {
           }}
         />
         <button className="btn btn-primary" onClick={doSearch}>
-          Search
+          {t("weather_search")}
         </button>
       </div>
 
@@ -103,11 +103,11 @@ export default function WeatherPage() {
               className="btn btn-sm btn-link text-danger"
               onClick={clearHistory}
             >
-              Clear
+              {t("weather_clear")}
             </button>
           </div>
         ) : (
-          <div className="text-muted">No recent cities</div>
+          <div className="text-muted">{t("weather_no_recent")}</div>
         )}
       </div>
 

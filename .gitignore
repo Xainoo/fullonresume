@@ -44,3 +44,5 @@ jest-stare/
 
 # Misc
 .vite
+# Local Netlify folder
+.netlify

@@ -118,14 +118,10 @@ export default function Layout() {
                   {t("nav_home")}
                 </NavLink>
               </li>
+              {/* portfolio and projects links removed from navbar — showcased on Home instead */}
               <li className="nav-item">
-                <NavLink className="nav-link" to="/portfolio">
-                  {t("nav_portfolio")}
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink className="nav-link" to="/projects">
-                  {t("nav_projects")}
+                <NavLink className="nav-link" to="/finance">
+                  {t("nav_finance")}
                 </NavLink>
               </li>
               <li className="nav-item">
