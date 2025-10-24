@@ -128,6 +128,11 @@ export default function Layout() {
                   {t("nav_projects")}
                 </NavLink>
               </li>
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/weather">
+                  {t("nav_weather")}
+                </NavLink>
+              </li>
             </ul>
           </div>
         </div>

@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import Portfolio from "./pages/Portfolio";
 import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
+import Weather from "./pages/Weather";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="portfolio" element={<Portfolio />} />
           <Route path="projects" element={<Projects />} />
           <Route path="projects/:id" element={<ProjectDetail />} />
+          <Route path="weather" element={<Weather />} />
         </Route>
       </Routes>
     </BrowserRouter>

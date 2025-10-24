@@ -80,6 +80,9 @@ export default function Home() {
           <motion.div className="d-flex flex-wrap gap-2" variants={container}>
             {[
               "React",
+              "JavaScript",
+              "Node.js",
+              "Python",
               "TypeScript",
               "HTML & CSS",
               "Bootstrap",

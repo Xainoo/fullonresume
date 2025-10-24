@@ -18,6 +18,7 @@ const translations: Record<Lang, Record<string, string>> = {
   en: {
     brand: "Krzysztof Przystaś",
     nav_home: "Home",
+    nav_weather: "Weather",
     nav_portfolio: "Portfolio",
     nav_projects: "Projects",
     home_title: "Hi, I'm Krzysztof — Frontend Developer",
@@ -33,6 +34,7 @@ const translations: Record<Lang, Record<string, string>> = {
   pl: {
     brand: "Krzysztof Przystaś",
     nav_home: "Strona główna",
+    nav_weather: "Pogoda",
     nav_portfolio: "Portfolio",
     nav_projects: "Projekty",
     home_title: "Cześć, jestem Krzysztof — Frontend Developer",
