@@ -337,6 +337,19 @@ body {
 	transition: background-color .12s ease, border-color .12s ease, box-shadow .12s ease;
 }
 
+/* Make list-group items theme-aware so expense records aren't bright white in dark mode */
+.list-group-item {
+	background: var(--page-bg);
+	color: var(--text);
+	border: 1px solid var(--card-border);
+}
+
+[data-theme="dark"] .list-group-item {
+	background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+	border: 1px solid var(--card-border);
+	color: var(--text);
+}
+
 .form-control::placeholder {
 	color: var(--muted);
 	opacity: 1;

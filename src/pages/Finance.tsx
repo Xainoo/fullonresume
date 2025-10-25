@@ -34,6 +34,7 @@ export default function FinancePage() {
           >
             <option value="US">United States</option>
             <option value="PL">Poland</option>
+            <option value="DK">Denmark</option>
             <option value="GB">United Kingdom</option>
             <option value="DE">Germany</option>
           </select>

@@ -14,6 +14,7 @@ export type WeatherApiResponse = {
  */
 export async function fetchCurrentWeather(city: string, lang?: string) {
   const useProxy = import.meta.env.VITE_USE_PROXY === "true";
+  const isDev = import.meta.env.DEV === true;
 
   if (useProxy) {
     // Call the Netlify Function proxy
@@ -32,10 +33,15 @@ export async function fetchCurrentWeather(city: string, lang?: string) {
 
     if (!res.ok) {
       // Recognize common upstream OpenWeather responses (e.g., invalid API key)
-      const clientKey = import.meta.env.VITE_OPENWEATHER_KEY as string | undefined;
 
-      // If upstream explicitly says invalid API key (cod:401), surface a clear message
+    // If upstream explicitly says invalid API key (cod:401), surface a clear message
   const upstreamInvalidKey = proxyPayload && (proxyPayload.cod === 401 || (proxyPayload.error && proxyPayload.error.cod === 401));
+
+    // Only attempt a direct client-side fallback in development. In production
+    // we must not embed client secrets in the build. Guard access to the
+    // VITE_OPENWEATHER_KEY with `import.meta.env.DEV` so the bundler can
+    // drop the development-only code during production minification.
+    const clientKey = isDev ? (import.meta.env.VITE_OPENWEATHER_KEY as string | undefined) : undefined;
 
       if (upstreamInvalidKey) {
         // If developer has a VITE client key available, fall back to client call (dev convenience)
@@ -80,9 +86,11 @@ export async function fetchCurrentWeather(city: string, lang?: string) {
     return json;
   }
 
-  const key = import.meta.env.VITE_OPENWEATHER_KEY as string | undefined;
+  const key = isDev ? (import.meta.env.VITE_OPENWEATHER_KEY as string | undefined) : undefined;
   if (!key) {
-    throw new Error("Missing VITE_OPENWEATHER_KEY environment variable.");
+    throw new Error(
+      "Missing VITE_OPENWEATHER_KEY environment variable. In production, enable the server-side proxy (set VITE_USE_PROXY=true) and set OPENWEATHER_KEY in your functions environment."
+    );
   }
 
   const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(

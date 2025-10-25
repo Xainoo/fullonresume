@@ -36,32 +36,28 @@ export default function Home() {
 
   const projects = [
     {
-      title: "Portfolio site",
-      description:
-        "A responsive portfolio showcasing selected projects, written with React & TypeScript. Includes accessibility and performance optimizations.",
-      longDescription:
-        "This portfolio demonstrates component-driven design, accessible markup, responsive layouts, and careful performance tradeoffs. Built with React, TypeScript, and Vite. Includes light/dark themes and i18n.",
+      id: "portfolio",
+      title: t("project_portfolio_title"),
+      description: t("project_portfolio_description"),
+      longDescription: t("project_portfolio_long"),
     },
     {
-      title: "Weather app",
-      description:
-        "A small weather dashboard with serverless proxy for API keys and graceful fallbacks. Theme-aware and localized.",
-      longDescription:
-        "Uses a Netlify Function to proxy OpenWeather API calls so API keys remain server-side. The UI gracefully falls back to a client key in local dev and shows warnings. Supports language localization and theme-aware styles.",
+      id: "weather",
+      title: t("project_weather_title"),
+      description: t("project_weather_description"),
+      longDescription: t("project_weather_long"),
     },
     {
-      title: "Finance analyzer",
-      description:
-        "Savings & investment tools with projection charts and country tax estimates. Built with small serverless functions.",
-      longDescription:
-        "Includes an expense tracker, savings simulator, and an investment analyzer that fetches historical data and estimates growth and taxes. Designed for clarity and quick what-if analysis.",
+      id: "finance",
+      title: t("project_finance_title"),
+      description: t("project_finance_description"),
+      longDescription: t("project_finance_long"),
     },
     {
-      title: "Interactive UI components",
-      description:
-        "Reusable components (InfoIcon, SkillPill, ProjectCard) designed for accessibility and small bundle size.",
-      longDescription:
-        "A small library of focused UI components: accessible info tooltips, keyboard-friendly skill pills, and composable cards. Each component prioritizes semantics and minimal styling.",
+      id: "ui",
+      title: t("project_ui_title"),
+      description: t("project_ui_description"),
+      longDescription: t("project_ui_long"),
     },
   ];
 
@@ -159,13 +155,7 @@ export default function Home() {
                   description={p.description}
                   onOpen={() => openProject(p)}
                   actionLabel={t("view_project")}
-                  actionHref={
-                    p.title.toLowerCase().includes("weather")
-                      ? "/weather"
-                      : p.title.toLowerCase().includes("finance")
-                      ? "/finance"
-                      : "#"
-                  }
+                  actionHref={p.id === "weather" ? "/weather" : p.id === "finance" ? "/finance" : "#"}
                 />
               </div>
             ))}
@@ -178,11 +168,7 @@ export default function Home() {
           </motion.h2>
           <div className="card h-100 hover-card">
             <div className="card-body">
-              <p className="card-text text-muted">
-                I'm passionate about building interfaces that are both beautiful
-                and usable. I enjoy turning complex problems into simple,
-                accessible experiences.
-              </p>
+              <p className="card-text text-muted">{t("about_me_paragraph")}</p>
             </div>
           </div>
         </div>
@@ -196,7 +182,7 @@ export default function Home() {
           </motion.h2>
           <div className="row row-cols-1 row-cols-md-3 g-3">
             {otherProjects.map((p) => (
-              <div className="col" key={p.title}>
+              <div className="col" key={p.id}>
                 <ProjectCard
                   title={p.title}
                   description={p.description}

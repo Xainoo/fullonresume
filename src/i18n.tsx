@@ -30,6 +30,8 @@ const translations: Record<Lang, Record<string, string>> = {
     skills: "Skills",
     featured_project: "Featured project",
     about: "About me",
+    about_me_paragraph:
+      "Programming is my passion, not just a career plan. I’m most excited about frontend development — I love building apps that are fast, accessible, and pleasant to use. I work mainly with React, JavaScript, TypeScript, Node.js, Python, HTML, and CSS, and I care about performance, accessibility, and clean code. Before switching to tech, I worked in various roles — from assisting visitors at a zoo to helping set up concert stages — experiences that taught me teamwork, responsibility, and working under pressure. Now I’m looking for my first opportunity in IT to learn, grow, and build projects I can be proud of.",
     footer_cta: "Interested in a CV or a quick walkthrough? Let's connect.",
     weather_loading: "Loading…",
     weather_using_client_fallback:
@@ -44,7 +46,6 @@ const translations: Record<Lang, Record<string, string>> = {
     weather_no_recent: "No recent cities",
     weather_search: "Search",
     weather_clear: "Clear",
-    /* Finance translations */
     expenses: "Expenses",
     savings: "Savings",
     country: "Country",
@@ -65,7 +66,6 @@ const translations: Record<Lang, Record<string, string>> = {
     add: "Add",
     total: "Total",
     description: "Description",
-    /* symbol descriptions */
     symbol_desc_SPY: "SPY — S&P 500 ETF (broad US market exposure)",
     symbol_desc_AAPL: "AAPL — Apple Inc., maker of iPhone and digital services",
     symbol_desc_MSFT: "MSFT — Microsoft Corporation, software and cloud leader",
@@ -77,7 +77,33 @@ const translations: Record<Lang, Record<string, string>> = {
       "Choose a symbol from the list or pick 'Other' to type your own ticker.",
     other: "Other",
     other_projects: "Other projects",
+    expenses_view_separate: "Separate (per currency)",
+    expenses_view_convert: "Convert to single currency",
+    refresh_rates: "Refresh rates",
+    rates_unavailable: "Rates unavailable",
+    loading_rates: "Loading rates…",
+    rates_last_updated: "Rates updated",
     view_project: "View project",
+    project_portfolio_title: "Portfolio site",
+    project_portfolio_description:
+      "A responsive portfolio showcasing selected projects, written with React & TypeScript. Includes accessibility and performance optimizations.",
+    project_portfolio_long:
+      "This portfolio demonstrates component-driven design, accessible markup, responsive layouts, and careful performance tradeoffs. Built with React, TypeScript, and Vite. Includes light/dark themes and i18n.",
+    project_weather_title: "Weather app",
+    project_weather_description:
+      "A small weather dashboard with serverless proxy for API keys and graceful fallbacks. Theme-aware and localized.",
+    project_weather_long:
+      "Uses a Netlify Function to proxy OpenWeather API calls so API keys remain server-side. The UI gracefully falls back to a client key in local dev and shows warnings. Supports language localization and theme-aware styles.",
+    project_finance_title: "Finance analyzer",
+    project_finance_description:
+      "Savings & investment tools with projection charts and country tax estimates. Built with small serverless functions.",
+    project_finance_long:
+      "Includes an expense tracker, savings simulator, and an investment analyzer that fetches historical data and estimates growth and taxes. Designed for clarity and quick what-if analysis.",
+    project_ui_title: "Interactive UI components",
+    project_ui_description:
+      "Reusable components (InfoIcon, SkillPill, ProjectCard) designed for accessibility and small bundle size.",
+    project_ui_long:
+      "A small library of focused UI components: accessible info tooltips, keyboard-friendly skill pills, and composable cards. Each component prioritizes semantics and minimal styling.",
   },
   pl: {
     brand: "Krzysztof Przystaś",
@@ -94,6 +120,8 @@ const translations: Record<Lang, Record<string, string>> = {
     skills: "Umiejętności",
     featured_project: "Projekt wyróżniony",
     about: "O mnie",
+    about_me_paragraph:
+      "Programowanie to moja pasja, a nie tylko plan na karierę. Najlepiej czuję się w świecie frontendu — lubię tworzyć aplikacje, które są nie tylko szybkie, ale też przyjazne dla użytkownika. Pracuję głównie z Reactem, JavaScriptem, TypeScriptem, Node.js, Pythonem, HTML-em i CSS-em. Zwracam uwagę na wydajność, dostępność i czysty kod. Wcześniej pracowałem w różnych środowiskach — od obsługi zwiedzających w zoo po montaż scen na koncertach — dzięki czemu nauczyłem się pracy zespołowej, odpowiedzialności i działania pod presją czasu. Teraz szukam swojej pierwszej szansy w IT, żeby dalej się uczyć, rozwijać i tworzyć projekty, z których będę dumny.",
     footer_cta: "Zainteresowany CV lub krótkim przeglądem? Skontaktuj się.",
     weather_loading: "Ładowanie…",
     weather_using_client_fallback:
@@ -108,7 +136,6 @@ const translations: Record<Lang, Record<string, string>> = {
     weather_no_recent: "Brak ostatnich miast",
     weather_search: "Szukaj",
     weather_clear: "Wyczyść",
-    /* Finance translations */
     expenses: "Wydatki",
     savings: "Oszczędności",
     country: "Kraj",
@@ -129,7 +156,6 @@ const translations: Record<Lang, Record<string, string>> = {
     add: "Dodaj",
     total: "Suma",
     description: "Opis",
-    /* symbol descriptions */
     symbol_desc_SPY:
       "SPY — ETF śledzący indeks S&P 500 (szeroka ekspozycja na rynek USA)",
     symbol_desc_AAPL:
@@ -146,13 +172,38 @@ const translations: Record<Lang, Record<string, string>> = {
       "Wybierz symbol z listy lub wybierz 'Inny' i wpisz własny ticker.",
     other: "Inny",
     other_projects: "Inne projekty",
+    expenses_view_separate: "Osobno (według waluty)",
+    expenses_view_convert: "Przelicz do jednej waluty",
+    refresh_rates: "Odśwież kursy",
+    rates_unavailable: "Kursy niedostępne",
+    loading_rates: "Ładowanie kursów…",
+    rates_last_updated: "Kursy zaktualizowano",
     view_project: "Zobacz projekt",
+    project_portfolio_title: "Strona portfolio",
+    project_portfolio_description:
+      "Responsywne portfolio prezentujące wybrane projekty, napisane w React i TypeScript. Zawiera optymalizacje dostępności i wydajności.",
+    project_portfolio_long:
+      "To portfolio pokazuje projektowanie zorientowane na komponenty, semantyczny kod, responsywne układy i przemyślane kompromisy wydajnościowe. Zbudowane z React, TypeScript i Vite. Zawiera motywy jasny/ciemny oraz i18n.",
+    project_weather_title: "Aplikacja pogodowa",
+    project_weather_description:
+      "Mały pulpit pogodowy z serwerową proxy dla kluczy API i łagodnymi mechanizmami zapasowymi. Obsługuje motywy i lokalizację.",
+    project_weather_long:
+      "Używa funkcji Netlify jako proxy do OpenWeather, aby klucze API pozostały po stronie serwera. Interfejs użytkownika w razie potrzeby korzysta z bezpiecznego fallbacku i pokazuje ostrzeżenia. Wspiera lokalizację i motywy.",
+    project_finance_title: "Analizator finansowy",
+    project_finance_description:
+      "Narzędzia do oszczędzania i inwestycji z wykresami prognoz i szacunkami podatkowymi dla wybranych krajów. Zbudowane z użyciem małych funkcji serverless.",
+    project_finance_long:
+      "Zawiera tracker wydatków, symulator oszczędności i analizator inwestycji, który pobiera dane historyczne i szacuje wzrost oraz podatki. Zaprojektowany z myślą o czytelności i szybkiej analizie scenariuszy.",
+    project_ui_title: "Interaktywne komponenty UI",
+    project_ui_description:
+      "Zestaw komponentów (InfoIcon, SkillPill, ProjectCard) zaprojektowanych pod kątem dostępności i małego rozmiaru pakietu.",
+    project_ui_long:
+      "Mała biblioteka wyspecjalizowanych komponentów: dostępne podpowiedzi, pigułki umiejętności przyjazne klawiaturze i kompozycyjne karty. Każdy komponent stawia na semantykę i minimalne style.",
   },
 };
 
 const I18nContext = createContext<I18nContextValue>({
   lang: "en",
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   setLang: () => {},
   t: (k: string) => k,
 });
@@ -173,7 +224,6 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     try {
       localStorage.setItem("lang", lang);
     } catch {}
-    // set html lang attribute for accessibility and SEO
     document.documentElement.lang = lang;
   }, [lang]);
 
