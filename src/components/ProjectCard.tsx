@@ -58,26 +58,36 @@ export default function ProjectCard({
         </div>
       )}
       <div className="card-body">
-        <h5 className="card-title">
-          {to ? (
-            <Link
-              to={to}
-              aria-label={`Open ${title}`}
-              className="card-title-link"
-            >
-              {title}
-            </Link>
-          ) : (
-            <span className="card-title-link">{title}</span>
-          )}
-        </h5>
+        <div className="project-card-meta mb-2">
+          <h5 className="card-title mb-0">
+            {to ? (
+              <Link
+                to={to}
+                aria-label={`Open ${title}`}
+                className="card-title-link"
+              >
+                {title}
+              </Link>
+            ) : (
+              <span className="card-title-link">{title}</span>
+            )}
+          </h5>
+          <div className="project-tags">
+            <span className="project-tag">React</span>
+            <span className="project-tag">TypeScript</span>
+          </div>
+        </div>
+
         <p className="card-text text-muted">{description}</p>
-        {actionHref && (
-          <div className="mt-3">
-            {actionHref.startsWith("/") ? (
+      </div>
+
+      <div className="card-footer project-card-footer">
+        <div>
+          {actionHref ? (
+            actionHref.startsWith("/") ? (
               <Link
                 to={actionHref}
-                className="btn btn-sm btn-outline-primary"
+                className="btn btn-sm btn-primary"
                 onClick={(e) => e.stopPropagation()}
                 aria-label={actionLabel ?? "View"}
               >
@@ -86,14 +96,25 @@ export default function ProjectCard({
             ) : (
               <a
                 href={actionHref}
-                className="btn btn-sm btn-outline-primary"
+                className="btn btn-sm btn-primary"
                 onClick={(e) => e.stopPropagation()}
               >
                 {actionLabel ?? "View"}
               </a>
-            )}
-          </div>
-        )}
+            )
+          ) : (
+            <button
+              className="btn btn-sm btn-outline-secondary"
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleClick();
+              }}
+            >
+              Open
+            </button>
+          )}
+        </div>
       </div>
     </motion.div>
   );

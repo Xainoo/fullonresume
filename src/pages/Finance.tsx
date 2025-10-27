@@ -2,6 +2,7 @@ import { useState } from "react";
 import ExpenseTracker from "../components/ExpenseTracker";
 import SavingsSimulator from "../components/SavingsSimulator";
 import InvestmentAnalyzer from "../components/InvestmentAnalyzer";
+import PageHeader from "../components/PageHeader";
 import { useTranslation } from "../i18n";
 
 export default function FinancePage() {
@@ -10,7 +11,7 @@ export default function FinancePage() {
 
   return (
     <div className="container py-4">
-      <h1>{t("nav_finance")}</h1>
+      <PageHeader title={t("nav_finance")} />
 
       <div className="row">
         <div className="col-md-6">

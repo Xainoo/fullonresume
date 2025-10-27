@@ -23,20 +23,23 @@ export default function WeatherWidget({ city = "London", onLoaded }: Props) {
       setData(w);
       try {
         onLoaded?.(w.name ?? c);
-      } catch {}
-    } catch (err: any) {
-      setError(err?.message || String(err));
+      } catch {
+        void 0;
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
       setData(null);
       try {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        if (
-          typeof window !== "undefined" &&
-          (window as any).__WEATHER_DIRECT_FALLBACK_USED
-        ) {
+        type GlobalWithFlag = typeof globalThis & {
+          __WEATHER_DIRECT_FALLBACK_USED?: boolean;
+        };
+        const g = globalThis as unknown as GlobalWithFlag;
+        if (g && g.__WEATHER_DIRECT_FALLBACK_USED) {
           setUsedDirectFallback(true);
         }
-      } catch {}
+      } catch {
+        void 0;
+      }
     } finally {
       setLoading(false);
     }

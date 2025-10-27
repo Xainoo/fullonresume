@@ -12,7 +12,10 @@ export type WeatherApiResponse = {
  * Fetch current weather from OpenWeatherMap.
  * Requires VITE_OPENWEATHER_KEY to be set in environment (.env).
  */
-export async function fetchCurrentWeather(city: string, lang?: string) {
+export async function fetchCurrentWeather(
+  city: string,
+  lang?: string
+): Promise<WeatherApiResponse> {
   const useProxy = import.meta.env.VITE_USE_PROXY === "true";
   const isDev = import.meta.env.DEV === true;
 
@@ -24,18 +27,32 @@ export async function fetchCurrentWeather(city: string, lang?: string) {
     const text = await res.text();
 
     // If proxy returned a JSON error body, try to parse it
-    let proxyPayload: any = null;
+    let proxyPayload: unknown = null;
     if (ct.includes("application/json")) {
       try {
         proxyPayload = JSON.parse(text);
-      } catch {}
+      } catch {
+        void 0;
+      }
     }
+
+    // type-guard helpers for the proxy payload
+    const isObj = (v: unknown): v is Record<string, unknown> =>
+      typeof v === "object" && v !== null;
 
     if (!res.ok) {
       // Recognize common upstream OpenWeather responses (e.g., invalid API key)
 
     // If upstream explicitly says invalid API key (cod:401), surface a clear message
-  const upstreamInvalidKey = proxyPayload && (proxyPayload.cod === 401 || (proxyPayload.error && proxyPayload.error.cod === 401));
+  let upstreamInvalidKey = false;
+  if (isObj(proxyPayload)) {
+    const cod = proxyPayload.cod;
+    if (typeof cod === "number") upstreamInvalidKey = cod === 401;
+    if (!upstreamInvalidKey && isObj(proxyPayload.error)) {
+      const eCod = proxyPayload.error.cod;
+      if (typeof eCod === "number") upstreamInvalidKey = eCod === 401;
+    }
+  }
 
     // Only attempt a direct client-side fallback in development. In production
     // we must not embed client secrets in the build. Guard access to the
@@ -45,13 +62,15 @@ export async function fetchCurrentWeather(city: string, lang?: string) {
 
       if (upstreamInvalidKey) {
         // If developer has a VITE client key available, fall back to client call (dev convenience)
-        if (clientKey) {
+          if (clientKey) {
           try {
             // Mark that we used a direct client fallback (only in browser).
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            if (typeof window !== "undefined") window.__WEATHER_DIRECT_FALLBACK_USED = true;
-          } catch {}
+            type GlobalWithFlag = typeof globalThis & { __WEATHER_DIRECT_FALLBACK_USED?: boolean };
+            const g = globalThis as unknown as GlobalWithFlag;
+            if (typeof g !== "undefined") g.__WEATHER_DIRECT_FALLBACK_USED = true;
+          } catch {
+            void 0;
+          }
 
           const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
             city
@@ -72,9 +91,10 @@ export async function fetchCurrentWeather(city: string, lang?: string) {
       }
 
       // Fallback: throw the proxy error (string or JSON)
-      if (proxyPayload && proxyPayload.error) {
+      if (isObj(proxyPayload) && proxyPayload.error) {
         // If proxy returned structured JSON error, include useful message
-        const errMsg = typeof proxyPayload.error === "string" ? proxyPayload.error : JSON.stringify(proxyPayload.error);
+        const err = proxyPayload.error;
+        const errMsg = typeof err === "string" ? err : JSON.stringify(err);
         throw new Error(errMsg);
       }
       throw new Error(text || `Weather proxy error: ${res.status}`);

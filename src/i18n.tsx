@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, {
   createContext,
   useContext,
@@ -104,6 +105,29 @@ const translations: Record<Lang, Record<string, string>> = {
       "Reusable components (InfoIcon, SkillPill, ProjectCard) designed for accessibility and small bundle size.",
     project_ui_long:
       "A small library of focused UI components: accessible info tooltips, keyboard-friendly skill pills, and composable cards. Each component prioritizes semantics and minimal styling.",
+    // Auth translations
+    auth_choose_action: "Choose an action",
+    auth_action_login: "Sign in",
+    auth_action_register: "Register",
+    auth_action_guest: "Enter as Guest",
+    auth_label_name: "Name",
+    auth_label_email: "Email",
+    auth_label_password: "Password",
+    auth_back: "Back",
+    auth_confirm_password: "Confirm password",
+    auth_admin_code_prompt: "Have an admin code?",
+    auth_admin_code_label: "Admin code",
+    greeting_user_prefix: "Hi",
+    greeting_guest: "Hi guest",
+    greeting_admin_prefix: "Hi admin",
+    logout: "Logout",
+    nav_admin: "Admin",
+    contact_title: "Contact & Socials",
+    admin_users_title: "User management",
+    admin_confirm_delete: "Are you sure you want to delete this user?",
+    admin_cannot_delete_admin: "Cannot delete admin user",
+    admin_delete: "Delete",
+    loading: "Loading...",
   },
   pl: {
     brand: "Krzysztof Przystaś",
@@ -199,6 +223,29 @@ const translations: Record<Lang, Record<string, string>> = {
       "Zestaw komponentów (InfoIcon, SkillPill, ProjectCard) zaprojektowanych pod kątem dostępności i małego rozmiaru pakietu.",
     project_ui_long:
       "Mała biblioteka wyspecjalizowanych komponentów: dostępne podpowiedzi, pigułki umiejętności przyjazne klawiaturze i kompozycyjne karty. Każdy komponent stawia na semantykę i minimalne style.",
+    // Auth translations
+    auth_choose_action: "Wybierz akcję",
+    auth_action_login: "Zaloguj się",
+    auth_action_register: "Zarejestruj się",
+    auth_action_guest: "Wejdź jako gość",
+    auth_label_name: "Imię",
+    auth_label_email: "Email",
+    auth_label_password: "Hasło",
+    auth_back: "Wstecz",
+    auth_confirm_password: "Potwierdź hasło",
+    auth_admin_code_prompt: "Masz kod administratora?",
+    auth_admin_code_label: "Kod administratora",
+    greeting_user_prefix: "Cześć",
+    greeting_guest: "Cześć gość",
+    greeting_admin_prefix: "Cześć admin",
+    logout: "Wyloguj",
+    nav_admin: "Administracja",
+    contact_title: "Kontakt i social media",
+    admin_users_title: "Zarządzanie użytkownikami",
+    admin_confirm_delete: "Czy na pewno chcesz usunąć tego użytkownika?",
+    admin_cannot_delete_admin: "Nie można usunąć administratora",
+    admin_delete: "Usuń",
+    loading: "Ładowanie...",
   },
 };
 
@@ -216,6 +263,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
         (stored as Lang) || (navigator.language?.startsWith("pl") ? "pl" : "en")
       );
     } catch {
+      void 0;
       return navigator.language?.startsWith("pl") ? "pl" : "en";
     }
   });
@@ -223,7 +271,9 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       localStorage.setItem("lang", lang);
-    } catch {}
+    } catch {
+      void 0;
+    }
     document.documentElement.lang = lang;
   }, [lang]);
 
@@ -243,4 +293,5 @@ export function useTranslation() {
   return useContext(I18nContext);
 }
 
-export default I18nContext;
+// Note: do not default-export non-component values in files that also export
+// components — keep only named exports to satisfy fast-refresh rules.

@@ -37,7 +37,7 @@ export default function ExpenseTracker() {
         if (Array.isArray(parsed)) setItems(parsed);
       }
     } catch {
-      /* ignore */
+      void 0;
     }
     try {
       const cur = localStorage.getItem(STORAGE_CURRENCY) as string | null;
@@ -45,27 +45,32 @@ export default function ExpenseTracker() {
         cur &&
         (cur === "PLN" || cur === "USD" || cur === "EUR" || cur === "GBP")
       ) {
-        setCurrency(cur as any);
-        setTargetCurrency(cur as any);
+        setCurrency(cur as "PLN" | "USD" | "EUR" | "GBP");
+        setTargetCurrency(cur as "PLN" | "USD" | "EUR" | "GBP");
       }
-    } catch {}
+    } catch {
+      void 0;
+    }
   }
 
   useEffect(() => {
     loadFromStorage();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items || []));
-    } catch {}
+    } catch {
+      void 0;
+    }
   }, [items]);
 
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_CURRENCY, currency);
-    } catch {}
+    } catch {
+      void 0;
+    }
   }, [currency]);
 
   function add() {
@@ -105,7 +110,7 @@ export default function ExpenseTracker() {
         // use server timestamp if available, otherwise use now
         setLastUpdated(json.timestamp ? json.timestamp : Date.now());
       }
-    } catch (err) {
+    } catch {
       // keep old rates if available; otherwise clear
       if (!rates) setRates(null);
     } finally {
@@ -135,7 +140,7 @@ export default function ExpenseTracker() {
       : 0;
 
   function formatAmount(value: number, cur?: string) {
-    const c = (cur || currency) as any;
+    const c = (cur || currency) as "PLN" | "USD" | "EUR" | "GBP";
     try {
       return new Intl.NumberFormat(undefined, {
         style: "currency",
@@ -185,7 +190,9 @@ export default function ExpenseTracker() {
         <select
           className="form-select form-select-sm w-auto me-2"
           value={currency}
-          onChange={(e) => setCurrency(e.target.value as any)}
+          onChange={(e) =>
+            setCurrency(e.target.value as "PLN" | "USD" | "EUR" | "GBP")
+          }
           aria-label="Currency"
         >
           <option value="PLN">PLN</option>
@@ -232,7 +239,11 @@ export default function ExpenseTracker() {
             <select
               className="form-select form-select-sm w-auto ms-3"
               value={targetCurrency}
-              onChange={(e) => setTargetCurrency(e.target.value as any)}
+              onChange={(e) =>
+                setTargetCurrency(
+                  e.target.value as "PLN" | "USD" | "EUR" | "GBP"
+                )
+              }
             >
               <option value="PLN">PLN</option>
               <option value="USD">USD</option>

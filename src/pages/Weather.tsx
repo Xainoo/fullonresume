@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import WeatherWidget from "../components/WeatherWidget";
+import PageHeader from "../components/PageHeader";
 import { useTranslation } from "../i18n";
 
 const HISTORY_KEY = "weather.recentCities";
@@ -18,7 +19,9 @@ function loadHistory(): string[] {
 function saveHistory(h: string[]) {
   try {
     localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
-  } catch {}
+  } catch {
+    void 0;
+  }
 }
 
 export default function WeatherPage() {
@@ -70,7 +73,7 @@ export default function WeatherPage() {
 
   return (
     <div className="container py-4">
-      <h1>{t("nav_weather")}</h1>
+      <PageHeader title={t("nav_weather")} actions={null} />
 
       <div className="mb-3 d-flex gap-2">
         <input

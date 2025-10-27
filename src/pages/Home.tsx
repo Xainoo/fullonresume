@@ -65,7 +65,12 @@ export default function Home() {
   const featuredProjects = [projects[1], projects[2]]; // Weather, Finance
   const otherProjects = [projects[0], projects[3]]; // Portfolio, Interactive UI components
 
-  function openProject(p: any) {
+  function openProject(p: {
+    title: string;
+    description: string;
+    longDescription: string;
+    image?: string;
+  }) {
     setSelected(p);
   }
 
@@ -155,7 +160,13 @@ export default function Home() {
                   description={p.description}
                   onOpen={() => openProject(p)}
                   actionLabel={t("view_project")}
-                  actionHref={p.id === "weather" ? "/weather" : p.id === "finance" ? "/finance" : "#"}
+                  actionHref={
+                    p.id === "weather"
+                      ? "/weather"
+                      : p.id === "finance"
+                      ? "/finance"
+                      : "#"
+                  }
                 />
               </div>
             ))}

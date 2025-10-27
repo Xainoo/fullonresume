@@ -41,7 +41,7 @@ export default function InvestmentAnalyzer({ country }: Props) {
 
       // Primary (relative) request (works when netlify dev or deployed proxy active)
       const primaryUrl = `/.netlify/functions/invest${query}`;
-      let attempt = await fetchInvest(primaryUrl);
+      const attempt = await fetchInvest(primaryUrl);
 
       // helper: try parse JSON safely
       function tryParseJson(text: string) {
@@ -65,7 +65,9 @@ export default function InvestmentAnalyzer({ country }: Props) {
         !attempt.contentType.includes("application/json")
       ) {
         // Try VITE_FUNCTIONS_URL (if set) then localhost:8888
-        const envUrl = (import.meta as any).env?.VITE_FUNCTIONS_URL;
+        const env = (import.meta as unknown as { env?: Record<string, string> })
+          .env;
+        const envUrl = env?.VITE_FUNCTIONS_URL;
         const fallbacks: string[] = [];
         if (envUrl)
           fallbacks.push(`${envUrl}/.netlify/functions/invest${query}`);
@@ -76,7 +78,7 @@ export default function InvestmentAnalyzer({ country }: Props) {
           `http://127.0.0.1:8888/.netlify/functions/invest${query}`
         );
 
-        let successJson: any = null;
+        let successJson: unknown = null;
         for (const fb of fallbacks) {
           try {
             const a = await fetchInvest(fb);
@@ -86,8 +88,9 @@ export default function InvestmentAnalyzer({ country }: Props) {
               setResult(successJson as InvestResult);
               break;
             }
-          } catch (e) {
+          } catch {
             // ignore and try next
+            void 0;
           }
         }
         if (successJson) return;
@@ -104,8 +107,8 @@ export default function InvestmentAnalyzer({ country }: Props) {
       const parsed = tryParseJson(attempt.text);
       if (!parsed) throw new Error("Failed to parse JSON response from server");
       setResult(parsed as InvestResult);
-    } catch (err: any) {
-      setError(err?.message || String(err));
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }

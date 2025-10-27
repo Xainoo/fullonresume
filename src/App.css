@@ -6,6 +6,9 @@
 	--muted: #6b7280;
 	--card-border: rgba(15,23,42,0.04);
 	--neutral-border: rgba(124,77,255,0.22);
+    --card-radius: 10px;
+    --card-shadow: 0 8px 26px rgba(2,6,23,0.06);
+    --card-shadow-strong: 0 12px 40px rgba(2,6,23,0.08);
 	/* stronger lavender tint for the weather card in light mode (more pronounced) */
 	--weather-bg: rgba(124,77,255,0.18);
 	/* stronger icon tile background in light mode for much better contrast */
@@ -25,6 +28,8 @@ body {
 	width: 180px;
 	border: 1px solid var(--card-border);
 	background: var(--page-bg);
+	border-radius: var(--card-radius);
+	box-shadow: var(--card-shadow);
 }
 
 .avatar {
@@ -50,6 +55,12 @@ body {
 	border: 1px solid var(--card-border);
 	font-weight: 600;
 	color: var(--text);
+}
+
+/* Unified card styles used across pages (Home / Weather / Finance) */
+.card {
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow);
 }
 
 .hover-card {
@@ -145,6 +156,9 @@ body {
 .btn-group .btn {
 	padding: 0.25rem 0.5rem;
 }
+
+/* Ensure language buttons keep consistent width to avoid layout jumps */
+.btn-group .btn { min-width: 38px; }
 
 .fade-in {
 	animation: fadeIn .6s ease both;
@@ -276,6 +290,10 @@ body {
 	transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
 }
 
+[data-theme="dark"] .weather-card {
+    box-shadow: 0 10px 30px rgba(2,6,23,0.12);
+}
+
 .weather-card img {
 	width: 72px;
 	height: 72px;
@@ -335,6 +353,7 @@ body {
 	color: var(--text);
 	border: 1px solid var(--card-border);
 	transition: background-color .12s ease, border-color .12s ease, box-shadow .12s ease;
+	border-radius: 8px;
 }
 
 /* Make list-group items theme-aware so expense records aren't bright white in dark mode */
@@ -342,6 +361,11 @@ body {
 	background: var(--page-bg);
 	color: var(--text);
 	border: 1px solid var(--card-border);
+}
+
+[data-theme="dark"] .list-group-item {
+    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+    border: 1px solid var(--card-border);
 }
 
 [data-theme="dark"] .list-group-item {
@@ -359,6 +383,147 @@ body {
 	outline: none;
 	box-shadow: 0 6px 18px rgba(59,130,246,0.08);
 	border-color: var(--accent-1);
+}
+
+[data-theme="dark"] .form-control:focus, [data-theme="dark"] .form-select:focus {
+	box-shadow: 0 8px 28px rgba(59,130,246,0.08);
+}
+
+/* Headings: unify spacing and weight across pages */
+.container h1, .container h2, .container h3 {
+	margin-top: 0;
+	margin-bottom: .75rem;
+	color: var(--text);
+}
+
+.container h1 { font-size: 1.85rem; font-weight: 700; }
+.container h2 { font-size: 1.25rem; font-weight: 700; }
+
+/* ===== Modern UI improvements (new) ===== */
+:root {
+	--surface: var(--page-bg);
+	--muted-2: rgba(15,23,42,0.45);
+	--glass: rgba(255,255,255,0.02);
+	--radius-lg: 14px;
+	--radius-md: 10px;
+	--gap: 1rem;
+}
+
+/* Smooth container and responsive max-width */
+.app-container {
+	max-width: 1120px;
+	margin: 0 auto;
+	padding: 1.25rem;
+}
+
+/* Modern navbar spacing */
+.app-navbar {
+	background: linear-gradient(180deg, transparent, rgba(0,0,0,0.02));
+	padding-top: 0.45rem;
+	padding-bottom: 0.45rem;
+}
+.navbar-brand { gap: .6rem; }
+
+/* Elevated, modern card style */
+.card {
+	border-radius: var(--radius-md);
+	transition: transform .16s ease, box-shadow .18s ease, border-color .12s ease;
+}
+.card.h-100 { display: flex; flex-direction: column; }
+.card-body { flex: 1 1 auto; }
+.card-footer { background: transparent; border-top: none; padding-top: .75rem; }
+.hover-card:hover { transform: translateY(-6px); box-shadow: 0 14px 40px rgba(2,6,23,0.08); }
+
+/* Buttons: modern primary and subtle outline */
+.btn-primary {
+	background: linear-gradient(90deg,var(--accent-1),var(--accent-2));
+	border: none;
+	color: white !important;
+	box-shadow: 0 6px 18px rgba(124,77,255,0.14);
+}
+.btn-primary:active, .btn-primary:focus { box-shadow: 0 8px 26px rgba(124,77,255,0.18); }
+.btn-outline-secondary {
+	background: transparent;
+	border: 1px solid rgba(124,77,255,0.12);
+}
+
+/* Page header modern look */
+.page-header { padding: .6rem 0; border-bottom: 1px solid rgba(0,0,0,0.04); }
+.page-header h1 { font-size: 1.4rem; margin: 0; }
+.page-header .text-muted { margin-top: .2rem; }
+.page-header-actions { display: flex; gap: .5rem; align-items: center; }
+
+/* Project card: imagery, subtle overlay and tighter layout */
+.project-card-clickable { cursor: pointer; }
+.project-card-clickable img { transition: transform .28s ease; }
+.project-card-clickable:hover img { transform: scale(1.03); }
+.project-card-meta { display:flex; align-items:center; gap:.5rem; justify-content:space-between; }
+.project-tags { display:flex; gap:.4rem; flex-wrap:wrap; }
+.project-tag { font-size:12px; padding:.18rem .5rem; border-radius:999px; background: rgba(0,0,0,0.04); color:var(--muted); }
+
+/* Hero styles */
+.hero-card { padding: 1.25rem; border-radius: var(--radius-lg); }
+.hero-card .avatar { width: 88px; height: 88px; font-size: 1.25rem; }
+
+/* Language button sizing to avoid layout jump */
+.lang-wrap .btn { min-width: 44px; }
+
+/* Contact dropdown strong background and padding */
+.brand-contact-dropdown { padding: .75rem; min-width: 280px; }
+.brand-contact-dropdown .contact-links { padding: 0; }
+.brand-contact-dropdown .small { color: var(--muted); }
+
+/* Icon buttons inside dropdown */
+.contact-links .btn { padding: .35rem .6rem; }
+.contact-links svg { opacity: .95; }
+
+/* Skeleton & improved spinner */
+.skeleton {
+	background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+	border-radius: 8px;
+	height: 12px;
+}
+.skeleton.h-24 { height: 24px; }
+
+/* Responsive tweaks */
+@media (max-width: 767px) {
+	.container { padding-left: .75rem; padding-right: .75rem; }
+	.hero-card { width: 100%; }
+}
+
+/* Accessibility: larger focus ring for keyboard users */
+button:focus, a:focus { outline: 3px solid rgba(59,130,246,0.14); outline-offset: 3px; }
+
+/* Footer CTA style */
+.footer-cta { margin-top: 2.25rem; padding: 1rem 0; border-top: 1px solid rgba(0,0,0,0.04); }
+
+/* small helpers used by components */
+.muted-small { color: var(--muted); font-size: .92rem; }
+
+/* dark theme tweaks for new styles */
+[data-theme="dark"] .btn-outline-secondary { border-color: rgba(255,255,255,0.06); }
+[data-theme="dark"] .project-tag { background: rgba(255,255,255,0.02); color: var(--muted); }
+
+/* ensure images in cards are rounded */
+.card img { border-top-left-radius: var(--radius-md); border-top-right-radius: var(--radius-md); }
+
+/* Modern project card footer */
+.project-card-footer { display:flex; justify-content:space-between; align-items:center; gap:.5rem; }
+
+/* end modern UI improvements */
+.container h3 { font-size: 1rem; font-weight: 600; }
+
+/* Make cards slightly taller on desktop for visual balance */
+@media (min-width: 768px) {
+	.card.h-100 { min-height: 160px; }
+}
+
+/* Tighter card body padding for small components (skill/project cards) */
+.card .card-body { padding: 1rem; }
+
+/* Small utility to make inputs and list items consistent and readable */
+.form-control, .form-select, .list-group-item, .btn-outline-secondary, .btn-link {
+	transition: background-color .12s ease, color .12s ease, border-color .12s ease;
 }
 
 [data-theme="dark"] .card {
@@ -392,3 +557,292 @@ body {
 	box-shadow: 0 12px 40px rgba(2,6,23,0.4);
 }
 .project-card-clickable { cursor: pointer; }
+
+/* Contact panel (dropdown) styling + animation */
+.contact-panel {
+	/* base card styles are inherited from .card */
+	transition: opacity 180ms ease, transform 200ms cubic-bezier(.2,.9,.2,1);
+	transform-origin: top right;
+	opacity: 0;
+	pointer-events: none;
+}
+.contact-panel--open {
+	opacity: 1;
+	transform: translateY(0) scale(1);
+	pointer-events: auto;
+}
+.contact-panel--closed {
+	opacity: 0;
+	transform: translateY(-8px) scale(0.99);
+	pointer-events: none;
+}
+
+/* Make the contact panel opaque in dark mode (avoid translucent backgrounds) */
+[data-theme="dark"] .contact-panel {
+	background: #061025; /* solid, non-transparent dark background */
+	border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Brand-anchored contact dropdown (desktop) */
+.brand-contact-dropdown {
+	position: absolute;
+	top: calc(100% + 8px);
+	left: 0;
+	min-width: 260px;
+	z-index: 1100;
+	background: var(--page-bg);
+	border: 1px solid var(--card-border);
+	border-radius: 8px;
+	box-shadow: 0 8px 28px rgba(2,6,23,0.08);
+	transition: opacity 160ms ease, transform 160ms ease;
+	transform-origin: top left;
+	opacity: 0;
+	pointer-events: none;
+}
+/* ensure dropdown background is fully opaque and matches theme page background */
+.brand-contact-dropdown {
+    background-color: var(--page-bg) !important;
+    backdrop-filter: none;
+}
+.brand-contact--open {
+	opacity: 1;
+	transform: translateY(0);
+	pointer-events: auto;
+}
+.brand-contact--closed { transform: translateY(-6px); }
+
+/* small toggle button next to brand */
+.contact-toggle-btn {
+	padding: 0.2rem 0.45rem;
+	line-height: 1;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* ensure brand area doesn't cause navbar reflow */
+.navbar-brand, .brand-text { white-space: nowrap; }
+.brand-contact-dropdown .contact-links { padding: 4px 0; }
+
+/* Improve visibility of danger buttons and alerts in dark mode */
+[data-theme="dark"] .btn-outline-danger {
+	color: #fecaca; /* light red/pink for contrast */
+	border-color: rgba(248,113,113,0.28);
+	background: transparent;
+}
+[data-theme="dark"] .btn-outline-danger:hover,
+[data-theme="dark"] .btn-outline-danger:focus {
+	background: rgba(248,113,113,0.12);
+	color: #fff;
+	border-color: rgba(248,113,113,0.4);
+}
+
+/* Tables: ensure clear stripes and borders in dark mode */
+[data-theme="dark"] .table {
+	color: var(--text);
+	border-color: var(--card-border);
+}
+[data-theme="dark"] .table th,
+[data-theme="dark"] .table td {
+	border-color: var(--card-border);
+}
+
+/* Alerts: subtle tinted backgrounds with readable text */
+[data-theme="dark"] .alert-danger {
+	background: rgba(220,38,38,0.08);
+	color: #ffdede;
+	border: 1px solid rgba(220,38,38,0.18);
+}
+[data-theme="dark"] .alert-info {
+	background: rgba(59,130,246,0.06);
+	color: #dbeafe;
+	border: 1px solid rgba(59,130,246,0.12);
+}
+
+/* Admin users area: ensure table and container visuals work in dark mode */
+[data-theme="dark"] .admin-users {
+	/* keep container content on top of dark page background */
+	color: var(--text);
+}
+
+[data-theme="dark"] .admin-users .table {
+	background: transparent;
+	color: var(--text);
+	/* Force Bootstrap table variables to dark-friendly values */
+	--bs-table-bg: transparent;
+	--bs-table-color: var(--text);
+	--bs-table-striped-bg: rgba(255,255,255,0.04);
+	--bs-table-striped-color: var(--text);
+	--bs-table-hover-bg: rgba(255,255,255,0.06);
+	--bs-table-hover-color: var(--text);
+	--bs-table-border-color: var(--card-border);
+}
+
+[data-theme="dark"] .admin-users .table thead th {
+	background: transparent;
+	color: var(--muted);
+	border-bottom: 1px solid var(--card-border);
+}
+
+[data-theme="dark"] .admin-users .table tbody tr {
+	background: transparent;
+}
+
+[data-theme="dark"] .admin-users .table td,
+[data-theme="dark"] .admin-users .table th {
+	border-color: var(--card-border);
+	vertical-align: middle;
+}
+
+/* Fallback: some Bootstrap builds color cells directly; ensure transparency */
+[data-theme="dark"] .admin-users .table > :not(caption) > * > * {
+	background-color: transparent !important;
+}
+
+[data-theme="dark"] .admin-users .table thead,
+[data-theme="dark"] .admin-users .table thead tr,
+[data-theme="dark"] .admin-users .table thead th {
+	background: transparent !important;
+}
+
+[data-theme="dark"] .admin-users .table .btn {
+	/* ensure buttons don't look washed out */
+	color: inherit;
+}
+
+[data-theme="dark"] .admin-users .card,
+[data-theme="dark"] .admin-users .container {
+	background: transparent;
+}
+
+[data-theme="dark"] .admin-users .table.table-sm td,
+[data-theme="dark"] .admin-users .table.table-sm th {
+	padding: .45rem .6rem;
+}
+
+[data-theme="dark"] .admin-users .empty-state {
+	color: var(--muted);
+}
+
+/* Slightly lighter background in light mode for contrast */
+.contact-panel {
+	background: var(--page-bg);
+}
+
+/* Prevent the phone number from wrapping onto multiple lines */
+.contact-links .contact-phone {
+	white-space: nowrap;
+	display: inline-block;
+}
+
+/* Layout tweaks for stacked contact content */
+.contact-links {
+	max-width: 100%;
+}
+.contact-links .icons-row {
+	display: flex;
+	gap: 8px;
+}
+.contact-links a.btn {
+	padding: 0.25rem 0.5rem;
+}
+
+/* Greeting bubble in navbar */
+.greeting-bubble {
+	display: inline-block;
+	padding: 6px 10px;
+	border-radius: 999px;
+	font-weight: 600;
+	font-size: 0.95rem;
+	color: var(--text);
+	background: rgba(0,0,0,0.04);
+	transition: background-color .12s ease, color .12s ease, transform .12s ease;
+}
+.greeting-bubble:hover { transform: translateY(-1px); }
+
+[data-theme="dark"] .greeting-bubble {
+	background: rgba(255,255,255,0.04);
+	color: var(--text);
+}
+
+.navbar-text { margin-left: 8px; }
+
+/* Slightly larger and more prominent when viewport is wide */
+@media (min-width: 768px) {
+	.greeting-bubble { font-size: 1.05rem; padding: 8px 12px; }
+}
+
+/* Accessibility utilities */
+.visually-hidden {
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	padding: 0 !important;
+	margin: -1px !important;
+	overflow: hidden !important;
+	clip: rect(0, 0, 0, 0) !important;
+	white-space: nowrap !important;
+	border: 0 !important;
+}
+.visually-hidden-focusable:active,
+.visually-hidden-focusable:focus {
+	position: static !important;
+	width: auto !important;
+	height: auto !important;
+	margin: 0 !important;
+	overflow: visible !important;
+	clip: auto !important;
+	white-space: normal !important;
+}
+
+/* Skip link placement */
+.skip-link { position: absolute; left: 8px; top: 8px; z-index: 1100; }
+
+/* Dark-mode helper for responsive tables */
+[data-theme="dark"] .table-responsive { background: transparent; }
+
+/* Navbar toggler visual tweaks */
+.navbar-toggler { padding: .25rem .5rem; line-height: 1; }
+[data-theme="dark"] .navbar-toggler { color: var(--text); border-color: var(--card-border); }
+[data-theme="dark"] .navbar-collapse.show { background: var(--page-bg); border-top: 1px solid var(--card-border); }
+
+/* Navbar layout: left brand, center area, right controls.
+	 Use flex centering rather than absolute positioning to avoid overlap. */
+.brand-block { display: flex; align-items: center; gap: 0.5rem; flex: 0 0 auto; min-width: 240px; }
+.brand-text { max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* The collapse wrapper consumes the middle space and centers its content (greeting). */
+.navbar-collapse-wrapper { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; gap: 1rem; position: relative; }
+
+/* Center area (greeting) is static in the flow and will be centered within the collapse wrapper. */
+.navbar-center { position: static; transform: none; }
+
+/* Keep end controls (theme, language) aligned to the right without shifting */
+.navbar-end { flex: 0 0 auto; }
+
+/* Slightly tighten spacing for brand-contact dropdown on small widths */
+@media (max-width: 767px) {
+	.brand-block { min-width: 140px; }
+	.brand-text { max-width: 90px; }
+	.navbar-collapse-wrapper { justify-content: flex-start; }
+}
+
+/* Stable spacing for navbar control buttons to avoid shifts when language text changes */
+.navbar-end { display: flex; align-items: center; gap: 0.6rem; }
+.navbar-end .btn { min-width: 44px; display: inline-flex; align-items: center; justify-content: center; }
+.navbar-end .btn-sm { padding: 0.25rem 0.5rem; }
+.logout-btn { min-width: 96px; padding-left: 0.6rem; padding-right: 0.6rem; white-space: nowrap; text-align: center; }
+.lang-wrap { min-width: 96px; display: inline-flex; align-items: center; justify-content: center; }
+.contact-toggle-btn { margin-left: 0.25rem; }
+
+/* Slightly increase gap on wider screens */
+@media (min-width: 992px) {
+	.navbar-end { gap: 0.85rem; }
+}
+
+/* Contact panel fixed placement overrides */
+.contact-panel {
+	transition: opacity 160ms ease, transform 160ms ease;
+}
+.contact-panel--open { opacity: 1; transform: translateY(0); }
+.contact-panel--closed { opacity: 0; transform: translateY(-6px); pointer-events: none; }
