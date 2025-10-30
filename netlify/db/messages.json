@@ -1,0 +1,28 @@
+{
+  "records": [
+    {
+      "id": "msg_1761836066572_70",
+      "user": "visitor",
+      "text": "siema",
+      "ts": 1761836066499
+    },
+    {
+      "id": "6ba03ff3-0684-4b21-b53c-a9fc1da09f5a",
+      "user": "visitor",
+      "text": "halo",
+      "ts": 1761837408859
+    },
+    {
+      "id": "94d400ff-b5bb-4e47-96dd-ec1b557f3905",
+      "user": "visitor",
+      "text": "hej",
+      "ts": 1761839292131
+    },
+    {
+      "id": "99e4de55-57f1-4aad-9b64-93c7fa164c1f",
+      "user": "visitor",
+      "text": "halo",
+      "ts": 1761845480674
+    }
+  ]
+}

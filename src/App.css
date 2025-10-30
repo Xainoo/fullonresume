@@ -537,6 +537,31 @@ button:focus, a:focus { outline: 3px solid rgba(59,130,246,0.14); outline-offset
 	border: 1px solid var(--card-border);
 }
 
+/* Style file input controls in dark mode so the button and text are visible
+   and consistent with other form controls. Uses the standard ::file-selector-button
+   plus the WebKit-specific pseudo-element for broader browser support. */
+[data-theme="dark"] .form-control[type="file"] {
+	background: var(--page-bg);
+	color: var(--text);
+	border: 1px solid var(--card-border);
+	padding: .35rem .6rem;
+}
+
+[data-theme="dark"] .form-control[type="file"]::-webkit-file-upload-button,
+[data-theme="dark"] .form-control[type="file"]::file-selector-button {
+	background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+	color: var(--text);
+	border: 1px solid var(--card-border);
+	padding: .25rem .6rem;
+	margin-right: .5rem;
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+[data-theme="dark"] .form-control-sm[type="file"] {
+	padding: .25rem .45rem;
+}
+
 /* Project modal styling */
 .project-modal-backdrop {
 	position: fixed;

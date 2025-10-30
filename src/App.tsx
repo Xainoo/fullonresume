@@ -8,6 +8,7 @@ import RequireAdmin from "./components/RequireAdmin";
 import Weather from "./pages/Weather";
 import Finance from "./pages/Finance";
 import AdminUsers from "./pages/AdminUsers";
+import AIPage from "./pages/AI";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="auth" element={<AuthPage />} />
         {/* Portfolio and Projects routes intentionally removed — featured on Home */}
         <Route path="weather" element={<Weather />} />
+        <Route path="ai" element={<AIPage />} />
         <Route path="finance" element={<Finance />} />
         <Route
           path="admin"
