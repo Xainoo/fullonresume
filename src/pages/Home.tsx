@@ -42,6 +42,14 @@ export default function Home() {
       longDescription: t("project_portfolio_long"),
     },
     {
+      id: "ai",
+      title: "AI playground",
+      description:
+        "Small demos: animal classifier (browser) and realtime chat.",
+      longDescription:
+        "Try the browser-only MobileNet classifier or the realtime chat powered by Pusher + Netlify Functions.",
+    },
+    {
       id: "weather",
       title: t("project_weather_title"),
       description: t("project_weather_description"),
@@ -63,7 +71,7 @@ export default function Home() {
 
   // split featured and other projects
   const featuredProjects = [projects[1], projects[2]]; // Weather, Finance
-  const otherProjects = [projects[0], projects[3]]; // Portfolio, Interactive UI components
+  const otherProjects = [projects[0], projects[3], projects[1]]; // Portfolio, Interactive UI components, AI
 
   function openProject(p: {
     title: string;

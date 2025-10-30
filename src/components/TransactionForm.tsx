@@ -1,28 +1,38 @@
-import React, { useState } from "react";
+import { useState, type FormEvent } from "react";
 import type { Transaction } from "../services/finance";
 
 export default function TransactionForm({
   onSave,
+  initial,
+  onCancel,
 }: {
   onSave: (t: Transaction) => void;
+  initial?: Partial<Transaction>;
+  onCancel?: () => void;
 }) {
-  const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState(0);
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [category, setCategory] = useState("General");
+  const [description, setDescription] = useState(initial?.description ?? "");
+  const [amount, setAmount] = useState(initial?.amount ?? 0);
+  const [date, setDate] = useState(() =>
+    initial?.date
+      ? new Date(initial.date).toISOString().slice(0, 10)
+      : new Date().toISOString().slice(0, 10)
+  );
+  const [category, setCategory] = useState(initial?.category ?? "General");
 
-  function submit(e: React.FormEvent) {
+  function submit(e: FormEvent) {
     e.preventDefault();
     const tx: Transaction = {
-      id: `tx_${Date.now()}`,
+      id: (initial && initial.id) || `tx_${Date.now()}`,
       description: description || "(no description)",
       amount: Number(amount),
       date: new Date(date).toISOString(),
       category,
     };
     onSave(tx);
-    setDescription("");
-    setAmount(0);
+    if (!initial) {
+      setDescription("");
+      setAmount(0);
+    }
   }
 
   return (
@@ -61,10 +71,19 @@ export default function TransactionForm({
         />
       </div>
 
-      <div>
+      <div className="d-flex gap-2">
         <button className="btn btn-sm btn-primary" type="submit">
-          Add
+          {initial ? "Save" : "Add"}
         </button>
+        {initial && onCancel && (
+          <button
+            type="button"
+            className="btn btn-sm btn-outline-secondary"
+            onClick={onCancel}
+          >
+            Cancel
+          </button>
+        )}
       </div>
     </form>
   );

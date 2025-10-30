@@ -1,4 +1,3 @@
-import React from "react";
 import type { Transaction } from "../services/finance";
 
 function miniSparkline(values: number[]) {
@@ -30,14 +29,17 @@ export default function BalanceChart({
   const series = sorted.map((t) => (balance += t.amount));
   if (series.length === 0)
     return <div className="text-muted">No chart data</div>;
+  const latest = series[series.length - 1] || 0;
+  const fmt = new Intl.NumberFormat(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
   const { w, h, points } = miniSparkline(series);
   return (
     <div className="card p-3">
       <div className="d-flex justify-content-between align-items-center mb-2">
         <div className="fw-bold">Balance</div>
-        <div className="fw-bold">
-          {series.length ? series[series.length - 1].toFixed(2) : "0.00"}
-        </div>
+        <div className="fw-bold">{fmt.format(latest)}</div>
       </div>
       <svg
         viewBox={`0 0 ${w} ${h}`}

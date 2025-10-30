@@ -187,6 +187,11 @@ export default function LayoutFixed(): ReactElement {
               {t("nav_weather")}
             </NavLink>
           </li>
+          <li className="nav-item">
+            <NavLink className="nav-link" to="/ai">
+              AI
+            </NavLink>
+          </li>
           <li className="nav-item d-lg-none">
             <div className="p-2">
               <ContactLinks />

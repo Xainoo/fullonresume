@@ -17,6 +17,24 @@ type I18nContextValue = {
 
 const translations: Record<Lang, Record<string, string>> = {
   en: {
+    ai_playground: "AI playground",
+    classifier_title: "Image Analizer (browser)",
+    classifier_desc:
+      "Uses TensorFlow.js MobileNet in the browser — works on Netlify free.",
+    classifier_confidence: "Confidence threshold:",
+    classifier_live: "Live",
+    classifier_no_predictions: "No predictions yet",
+    smoke_test_title: "Classifier smoke test",
+    smoke_test_desc: "Run a quick smoke test against a sample image (remote).",
+    chat_title: "Realtime chat (Pusher WebSocket)",
+    chat_desc:
+      "Uses Pusher channels for WebSocket-style realtime messaging. You need to set VITE_PUSHER_KEY and VITE_PUSHER_CLUSTER in your env.",
+    realtime_disabled: "Realtime disabled (no Pusher key). Local-only chat.",
+    run_smoke_test: "Run smoke test",
+    open_sample_image: "Open sample image",
+    no_messages_yet: "No messages yet",
+    type_message_placeholder: "Type a message",
+    send: "Send",
     brand: "Krzysztof Przystaś",
     nav_home: "Home",
     nav_weather: "Weather",
@@ -100,6 +118,11 @@ const translations: Record<Lang, Record<string, string>> = {
       "Savings & investment tools with projection charts and country tax estimates. Built with small serverless functions.",
     project_finance_long:
       "Includes an expense tracker, savings simulator, and an investment analyzer that fetches historical data and estimates growth and taxes. Designed for clarity and quick what-if analysis.",
+    // Finance dashboard friendly labels
+    finance_dashboard: "Personal Finance",
+    add_transaction: "Record a transaction",
+    import_csv: "Import transactions (CSV)",
+    export_csv: "Export transactions (CSV)",
     project_ui_title: "Interactive UI components",
     project_ui_description:
       "Reusable components (InfoIcon, SkillPill, ProjectCard) designed for accessibility and small bundle size.",
@@ -110,6 +133,8 @@ const translations: Record<Lang, Record<string, string>> = {
     auth_action_login: "Sign in",
     auth_action_register: "Register",
     auth_action_guest: "Enter as Guest",
+    guest_label: "Guest",
+    logged_in_as: "Logged in as:",
     auth_label_name: "Name",
     auth_label_email: "Email",
     auth_label_password: "Password",
@@ -130,6 +155,24 @@ const translations: Record<Lang, Record<string, string>> = {
     loading: "Loading...",
   },
   pl: {
+    ai_playground: "Przestrzeń AI",
+    classifier_title: "Klasyfikator zwierząt (w przeglądarce)",
+    classifier_desc:
+      "Używa TensorFlow.js MobileNet po stronie klienta — działa na Netlify Free.",
+    classifier_confidence: "Próg pewności:",
+    classifier_live: "Na żywo",
+    classifier_no_predictions: "Brak przewidywań",
+    smoke_test_title: "Test dymny klasyfikatora",
+    smoke_test_desc: "Uruchom szybki test na przykładowym obrazie (lokalny).",
+    chat_title: "Czat w czasie rzeczywistym (Pusher WebSocket)",
+    chat_desc:
+      "Używa kanałów Pusher do komunikacji w czasie rzeczywistym. Ustaw VITE_PUSHER_KEY i VITE_PUSHER_CLUSTER w swoim env.",
+    realtime_disabled: "Realtime wyłączony (brak klucza Pusher). Czat lokalny.",
+    run_smoke_test: "Uruchom test dymny",
+    open_sample_image: "Otwórz przykładowy obraz",
+    no_messages_yet: "Brak wiadomości",
+    type_message_placeholder: "Wpisz wiadomość",
+    send: "Wyślij",
     brand: "Krzysztof Przystaś",
     nav_home: "Strona główna",
     nav_weather: "Pogoda",
@@ -218,6 +261,11 @@ const translations: Record<Lang, Record<string, string>> = {
       "Narzędzia do oszczędzania i inwestycji z wykresami prognoz i szacunkami podatkowymi dla wybranych krajów. Zbudowane z użyciem małych funkcji serverless.",
     project_finance_long:
       "Zawiera tracker wydatków, symulator oszczędności i analizator inwestycji, który pobiera dane historyczne i szacuje wzrost oraz podatki. Zaprojektowany z myślą o czytelności i szybkiej analizie scenariuszy.",
+    // Przyjazne etykiety dla modułu finansowego
+    finance_dashboard: "Finanse osobiste",
+    add_transaction: "Zarejestruj transakcję",
+    import_csv: "Importuj transakcje (CSV)",
+    export_csv: "Eksportuj transakcje (CSV)",
     project_ui_title: "Interaktywne komponenty UI",
     project_ui_description:
       "Zestaw komponentów (InfoIcon, SkillPill, ProjectCard) zaprojektowanych pod kątem dostępności i małego rozmiaru pakietu.",
@@ -228,6 +276,8 @@ const translations: Record<Lang, Record<string, string>> = {
     auth_action_login: "Zaloguj się",
     auth_action_register: "Zarejestruj się",
     auth_action_guest: "Wejdź jako gość",
+    guest_label: "Gość",
+    logged_in_as: "Zalogowany jako:",
     auth_label_name: "Imię",
     auth_label_email: "Email",
     auth_label_password: "Hasło",
