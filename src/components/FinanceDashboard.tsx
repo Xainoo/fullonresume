@@ -3,6 +3,8 @@ import PageHeader from "./PageHeader";
 import TransactionsList from "./TransactionsList";
 import TransactionForm from "./TransactionForm";
 import BalanceChart from "./BalanceChart";
+import MonthlySummary from "./MonthlySummary";
+import BudgetEditor from "./BudgetEditor";
 import {
   fetchTransactions,
   saveTransaction,
@@ -11,6 +13,9 @@ import {
   updateTransaction,
 } from "../services/finance";
 import type { Transaction } from "../services/finance";
+import { fetchBudgets, type BudgetRecord } from "../services/finance";
+import { fetchRates } from "../services/rates";
+import type { Rates } from "../services/rates";
 import { useTranslation } from "../i18n";
 import ConfirmModal from "./ConfirmModal";
 
@@ -21,6 +26,19 @@ export default function FinanceDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [budgets, setBudgets] = useState<Record<string, BudgetRecord> | null>(
+    null
+  );
+  const [rates, setRates] = useState<Rates | null>(null);
+  const [ratesLoading, setRatesLoading] = useState<boolean>(false);
+  const [ratesError, setRatesError] = useState<boolean>(false);
+  const [displayCurrency, setDisplayCurrency] = useState<string>(() => {
+    try {
+      return (localStorage.getItem("display_currency") as string) || "PLN";
+    } catch {
+      return "PLN";
+    }
+  });
 
   useEffect(() => {
     setLoading(true);
@@ -30,19 +48,36 @@ export default function FinanceDashboard() {
       .finally(() => setLoading(false));
   }, []);
 
+  // fetch budgets and rates when displayCurrency changes (or on mount)
+  useEffect(() => {
+    fetchBudgets().then((b) => setBudgets(b));
+    setRatesLoading(true);
+    setRatesError(false);
+    fetchRates(displayCurrency)
+      .then((r) => {
+        setRates(r);
+      })
+      .catch(() => {
+        setRates(undefined as unknown as Rates);
+        setRatesError(true);
+      })
+      .finally(() => setRatesLoading(false));
+  }, [displayCurrency]);
+
   function scrollToForm() {
     const el = document.getElementById("txn-form");
     if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
   function exportCsv() {
-    const header = ["date", "description", "amount", "category"];
+    const header = ["date", "description", "amount", "currency", "category"];
     const escape = (v: string) => `"${String(v).replace(/"/g, '""')}"`;
     const rows = transactions.map((r) =>
       [
         escape((r.date || "").slice(0, 10)),
         escape(r.description || ""),
         escape(String(r.amount)),
+        escape(r.currency || ""),
         escape(r.category || ""),
       ].join(",")
     );
@@ -124,7 +159,53 @@ export default function FinanceDashboard() {
       <div className="row">
         <div className="col-md-8">
           <div className="mb-3">
-            <BalanceChart transactions={transactions} />
+            <BalanceChart
+              transactions={transactions}
+              rates={rates ?? undefined}
+              displayCurrency={displayCurrency}
+            />
+          </div>
+
+          <div className="mb-3 d-flex justify-content-end gap-2 align-items-center">
+            <div className="small text-muted align-self-center">
+              {t("display")}
+            </div>
+            <select
+              className="form-select form-select-sm w-auto"
+              value={displayCurrency}
+              onChange={(e) => {
+                const v = e.target.value;
+                setDisplayCurrency(v);
+                try {
+                  localStorage.setItem("display_currency", v);
+                } catch {
+                  void 0;
+                }
+              }}
+            >
+              <option value="PLN">PLN</option>
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="DKK">DKK</option>
+              <option value="GBP">GBP</option>
+            </select>
+            {ratesLoading ? (
+              <div className="small text-muted">Loading rates…</div>
+            ) : ratesError ? (
+              <div className="small text-danger">{t("rates_unavailable")}</div>
+            ) : (
+              <div className="small text-muted">{t("rates_last_updated")}</div>
+            )}
+          </div>
+
+          <div className="mb-3">
+            <MonthlySummary
+              transactions={transactions}
+              months={6}
+              budgets={budgets ?? undefined}
+              rates={rates ?? undefined}
+              displayCurrency={displayCurrency}
+            />
           </div>
 
           <TransactionsList
@@ -132,6 +213,8 @@ export default function FinanceDashboard() {
             loading={loading}
             onEdit={onEdit}
             onDelete={onDelete}
+            rates={rates ?? undefined}
+            displayCurrency={displayCurrency}
           />
         </div>
 
@@ -148,6 +231,8 @@ export default function FinanceDashboard() {
               />
             </div>
           </div>
+
+          <BudgetEditor months={6} onChange={(b) => setBudgets(b)} />
 
           <div className="card p-3">
             <h6 className="mb-2">{t("import_csv") || "Import CSV"}</h6>

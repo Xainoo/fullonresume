@@ -1,4 +1,8 @@
+// intentionally no hooks required here
 import type { Transaction } from "../services/finance";
+import type { Rates } from "../services/rates";
+import { convertAmount } from "../services/rates";
+import { useTranslation } from "../i18n";
 
 function miniSparkline(values: number[]) {
   const pad = 4;
@@ -19,39 +23,69 @@ function miniSparkline(values: number[]) {
 
 export default function BalanceChart({
   transactions,
+  rates,
+  displayCurrency = "PLN",
 }: {
   transactions: Transaction[];
+  rates?: Rates;
+  displayCurrency?: string;
 }) {
+  const { t } = useTranslation();
   const sorted = [...transactions].sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   );
   let balance = 0;
-  const series = sorted.map((t) => (balance += t.amount));
+  const series = sorted.map((t) => {
+    const amt = rates
+      ? convertAmount(t.amount, t.currency, displayCurrency, rates)
+      : t.amount;
+    return (balance += amt);
+  });
   if (series.length === 0)
     return <div className="text-muted">No chart data</div>;
   const latest = series[series.length - 1] || 0;
-  const fmt = new Intl.NumberFormat(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  const fmt = (v: number) => {
+    try {
+      return new Intl.NumberFormat(undefined, {
+        style: "currency",
+        currency: displayCurrency || "PLN",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(v);
+    } catch {
+      return v.toFixed(2);
+    }
+  };
   const { w, h, points } = miniSparkline(series);
+  const trend = series.length > 1 ? series[series.length - 1] - series[0] : 0;
+  const color = trend >= 0 ? "#198754" : "#dc3545";
+  // Build area points for fill
+  const areaPoints = `${points} ${w - 4},${h - 4} 4,${h - 4}`;
+
   return (
     <div className="card p-3">
       <div className="d-flex justify-content-between align-items-center mb-2">
-        <div className="fw-bold">Balance</div>
-        <div className="fw-bold">{fmt.format(latest)}</div>
+        <div className="fw-bold">{t("balance") || "Balance"}</div>
+        <div
+          className="fw-bold"
+          title={`${displayCurrency} ${latest.toFixed(2)}`}
+        >
+          {fmt(latest)}
+        </div>
       </div>
       <svg
         viewBox={`0 0 ${w} ${h}`}
-        style={{ width: "100%", height: 48 }}
+        style={{ width: "100%", height: 64 }}
         xmlns="http://www.w3.org/2000/svg"
       >
-        <polyline
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          points={points}
-        />
+        <defs>
+          <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity="0.25" />
+            <stop offset="100%" stopColor={color} stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <polyline fill="url(#g1)" stroke="none" points={areaPoints} />
+        <polyline fill="none" stroke={color} strokeWidth={2} points={points} />
       </svg>
     </div>
   );

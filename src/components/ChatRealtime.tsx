@@ -9,9 +9,8 @@ const PUSHER_CLUSTER = import.meta.env.VITE_PUSHER_CLUSTER as
   | undefined;
 
 export default function ChatRealtime() {
-  const [messages, setMessages] = useState<
-    Array<{ id?: string; user: string; text: string; ts: number }>
-  >([]);
+  type Message = { id?: string; user: string; text: string; ts: number };
+  const [messages, setMessages] = useState<Array<Message>>([]);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const { t } = useTranslation();
@@ -22,6 +21,23 @@ export default function ChatRealtime() {
     : t("guest_label");
   const pusherAvailable = Boolean(PUSHER_KEY);
 
+  function formatTimestamp(ts: number) {
+    try {
+      const d = new Date(ts);
+      const today = new Date();
+      if (
+        d.getFullYear() === today.getFullYear() &&
+        d.getMonth() === today.getMonth() &&
+        d.getDate() === today.getDate()
+      ) {
+        return d.toLocaleTimeString();
+      }
+      return d.toLocaleString();
+    } catch {
+      return "";
+    }
+  }
+
   // load persisted messages on mount
   useEffect(() => {
     async function load() {
@@ -30,7 +46,7 @@ export default function ChatRealtime() {
         if (!res.ok) return;
         const json = await res.json();
         if (Array.isArray(json.records)) {
-          setMessages(json.records as any);
+          setMessages(json.records as Array<Message>);
         }
       } catch {
         // ignore
@@ -64,22 +80,30 @@ export default function ChatRealtime() {
       ]);
       return;
     }
-    const opts: any = { useTLS: true };
-    if (PUSHER_CLUSTER) opts.cluster = PUSHER_CLUSTER;
-    const pusher = new Pusher(PUSHER_KEY as string, opts);
+    const opts: Record<string, unknown> = { useTLS: true };
+    if (PUSHER_CLUSTER)
+      (opts as Record<string, unknown>).cluster = PUSHER_CLUSTER;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const pusher = new Pusher(PUSHER_KEY as string, opts as any);
     const channel = pusher.subscribe("ai-chat");
-    channel.bind("message", (data: any) => {
+    channel.bind("message", (data: unknown) => {
       // dedupe incoming messages to avoid duplicates when using optimistic echo
       setMessages((m) => {
-        const incoming = {
-          id: data.id,
-          user: data.user || "bot",
-          text: data.text,
-          ts: data.ts || Date.now(),
-        } as any;
+        const d = data as {
+          id?: string;
+          user?: string;
+          text?: string;
+          ts?: number;
+        };
+        const incoming: Message = {
+          id: d.id,
+          user: d.user || "bot",
+          text: d.text || "",
+          ts: d.ts || Date.now(),
+        };
         // if incoming has an id, prefer id-based dedupe
         const duplicate = incoming.id
-          ? m.some((msg) => (msg as any).id === incoming.id)
+          ? m.some((msg) => msg.id === incoming.id)
           : m.some(
               (msg) =>
                 msg.user === incoming.user &&
@@ -107,13 +131,25 @@ export default function ChatRealtime() {
     setSending(true);
     try {
       // generate an id for exact deduplication
-      const id =
-        typeof crypto !== "undefined" && (crypto as any).randomUUID
-          ? (crypto as any).randomUUID()
-          : `msg_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-      const msg: any = { id, user: "visitor", text, ts: Date.now() };
+      const id = (() => {
+        try {
+          const c = globalThis.crypto as unknown as {
+            randomUUID?: () => string;
+          };
+          if (typeof c.randomUUID === "function") return c.randomUUID!();
+        } catch {
+          // ignore
+        }
+        return `msg_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      })();
+      const msg: Message = {
+        id,
+        user: displayName || "visitor",
+        text,
+        ts: Date.now(),
+      };
       // persist message to messages function for demo persistence and capture returned record
-      let persistedRecord: any = null;
+      let persistedRecord: Message | null = null;
       try {
         const res = await fetch("/.netlify/functions/messages?op=add", {
           method: "POST",
@@ -124,7 +160,7 @@ export default function ChatRealtime() {
           const json = await res.json();
           persistedRecord = json.record || null;
         }
-      } catch (e) {
+      } catch {
         // ignore persistence failures
       }
 
@@ -136,7 +172,7 @@ export default function ChatRealtime() {
           body: JSON.stringify({
             id: msg.id,
             text,
-            user: "visitor",
+            user: msg.user,
             ts: msg.ts,
           }),
         });
@@ -174,6 +210,7 @@ export default function ChatRealtime() {
           padding: 8,
         }}
         ref={containerRef}
+        id="chat-messages"
       >
         {messages.length === 0 && (
           <div className="small text-muted">{t("no_messages_yet")}</div>
@@ -182,9 +219,7 @@ export default function ChatRealtime() {
           <div key={i} style={{ marginBottom: 6 }}>
             <strong style={{ fontSize: 12 }}>{m.user}</strong>
             <div style={{ fontSize: 14 }}>{m.text}</div>
-            <div className="small text-muted">
-              {new Date(m.ts).toLocaleTimeString()}
-            </div>
+            <div className="small text-muted">{formatTimestamp(m.ts)}</div>
           </div>
         ))}
       </div>
@@ -195,6 +230,8 @@ export default function ChatRealtime() {
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder={t("type_message_placeholder")}
+          aria-label={t("type_message_placeholder")}
+          aria-describedby="chat-messages"
         />
         <button
           className="btn btn-sm btn-primary"

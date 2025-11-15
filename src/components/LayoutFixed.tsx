@@ -188,8 +188,13 @@ export default function LayoutFixed(): ReactElement {
             </NavLink>
           </li>
           <li className="nav-item">
-            <NavLink className="nav-link" to="/ai">
-              AI
+            <NavLink className="nav-link" to="/image-analyzer">
+              {t("nav_image_analyzer")}
+            </NavLink>
+          </li>
+          <li className="nav-item">
+            <NavLink className="nav-link" to="/chat">
+              {t("nav_chat")}
             </NavLink>
           </li>
           <li className="nav-item d-lg-none">

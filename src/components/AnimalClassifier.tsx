@@ -1,11 +1,12 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useTranslation } from "../i18n";
+import type { MobileNet } from "@tensorflow-models/mobilenet";
 
 export default function AnimalClassifier() {
   const { t } = useTranslation();
   const imgRef = useRef<HTMLImageElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const modelRef = useRef<any>(null);
+  const modelRef = useRef<MobileNet | null>(null);
   const [loading, setLoading] = useState(false);
   const [predictions, setPredictions] = useState<
     Array<{ className: string; probability: number }>
@@ -22,7 +23,6 @@ export default function AnimalClassifier() {
     setLoading(true);
     try {
       // dynamic import so bundle size is deferred until needed
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const mobilenet = await import("@tensorflow-models/mobilenet");
       await import("@tensorflow/tfjs");
       modelRef.current = await mobilenet.load();
@@ -42,9 +42,12 @@ export default function AnimalClassifier() {
     setLoading(true);
     try {
       const model = await loadModelIfNeeded();
-      const preds = await model.classify(img);
+      const preds = (await model.classify(img)) as Array<{
+        className: string;
+        probability: number;
+      }>;
       setPredictions(
-        preds.map((p: any) => ({
+        preds.map((p) => ({
           className: p.className,
           probability: p.probability,
         }))
@@ -64,9 +67,12 @@ export default function AnimalClassifier() {
     setIsLiveClassifying(true);
     try {
       const model = await loadModelIfNeeded();
-      const preds = await model.classify(video as any);
+      const preds = (await model.classify(video as HTMLVideoElement)) as Array<{
+        className: string;
+        probability: number;
+      }>;
       setPredictions(
-        preds.map((p: any) => ({
+        preds.map((p) => ({
           className: p.className,
           probability: p.probability,
         }))
@@ -128,7 +134,6 @@ export default function AnimalClassifier() {
       // cleanup on unmount
       stopCamera();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // no top-result highlighting: keep predictions as-is and only dim low-confidence items
