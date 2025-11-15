@@ -32,18 +32,18 @@ npm run build
 - `src/pages/*` — Home, Portfolio, Projects, ProjectDetail
 - `src/components/ListGroup.tsx` — existing component (can be removed later)
 
-## Browser-only Animal Classifier and Realtime Chat
+## Image Analyzer and Realtime Chat
 
-This project includes two small interactive features that work well on Netlify Free:
+This project includes two small interactive features showcased in the AI playground:
 
-- Animal classifier (browser-only): The classifier uses TensorFlow.js and MobileNet in the browser. Model loading is deferred (dynamic import) so it only downloads when you use the classifier. The component supports uploading an image or using the webcam for live classification — no server-side inference required.
-- Realtime chat (Pusher + Netlify Functions): A small Netlify Function (`netlify/functions/pusher-trigger.js`) triggers Pusher server-side to broadcast chat messages. The client reads `VITE_PUSHER_KEY` to subscribe to the `ai-chat` channel. If Pusher env vars are not provided during local development, the chat falls back to a local-only client-side mode so the UI remains usable.
+- Image analyzer: The component uses TensorFlow.js for client-side image classification. Model loading is deferred (dynamic import) so it only downloads when you use the analyzer. The component supports uploading an image or using the webcam for live classification — no server-side inference required.
+- Realtime chat (Pusher + Netlify Functions): A small Netlify Function (`netlify/functions/pusher-trigger.js`) triggers Pusher server-side to broadcast chat messages. The client will subscribe to the `ai-chat` channel when a client-side realtime key is provided. If realtime keys are not present during local development, the chat falls back to a local-only preview mode so the UI remains usable.
 
 Deployment and env notes
 
-- Client-side envs (for local dev with Vite): add Vite-prefixed variables to `.env` or `.env.local` like `VITE_PUSHER_KEY` and `VITE_PUSHER_CLUSTER`. These are read by the client.
+- Client-side preview: for a local preview of realtime features you may set client-side variables in a local `.env` file (Vite exposes vars that start with `VITE_`). These are optional and only needed for local realtime previews.
 - Server-side envs for Netlify Functions: configure `PUSHER_APP_ID`, `PUSHER_KEY`, `PUSHER_SECRET`, and `PUSHER_CLUSTER` in the Netlify site settings (these are not prefixed with `VITE_`). The function `pusher-trigger.js` uses these server-side envs to call Pusher.
-- For the classifier: no server envs required. The browser downloads the TensorFlow.js model directly from the CDN when first used.
+- For the image analyzer: no server envs are required. The browser downloads the TensorFlow.js model directly from the CDN when first used.
 
 Local testing checklist
 
@@ -71,10 +71,7 @@ Netlify + Pusher quick deploy guide
 
    These env vars are used by `netlify/functions/pusher-trigger.js` when the function runs on Netlify.
 
-3. (Optional) For local client preview, add Vite-prefixed client values in your local `.env` file (these are safe for preview but avoid committing secrets):
-
-   - `VITE_PUSHER_KEY` = same as `PUSHER_KEY`
-   - `VITE_PUSHER_CLUSTER` = same as `PUSHER_CLUSTER`
+3. (Optional) For local client preview, add any Vite-prefixed client values in your local `.env` file (avoid committing secrets). These are only required if you want a full realtime preview locally.
 
 4. Deploy your site to Netlify. The Netlify Function `pusher-trigger` will be deployed from `netlify/functions/pusher-trigger.js` automatically. Once deployed, the client can POST to `/.netlify/functions/pusher-trigger` to broadcast messages to the `ai-chat` channel.
 
@@ -91,5 +88,45 @@ curl -X POST "https://your-site.netlify.app/.netlify/functions/pusher-trigger" -
 
 Troubleshooting
 
-- If the client shows "Realtime disabled (no Pusher key)", ensure `VITE_PUSHER_KEY` is set locally or the site has the correct key after deploy.
+- If the client shows "Realtime disabled (no Pusher key)", ensure your local preview vars are set or that the site has the correct server-side Pusher credentials after deploy.
 - If the Netlify function returns 500, check Netlify function logs (Netlify dashboard) for missing or incorrect server-side Pusher credentials.
+
+## CV, Live demo and CI
+
+Quick actions to make this repo recruiter-ready:
+
+- Add a short custom domain for the live demo (Netlify makes this easy).
+- Use the built-in `/cv` page for a downloadable CV and on-site resume copy.
+- CI: this repo includes a basic GitHub Actions workflow at `.github/workflows/ci.yml` that runs TypeScript checks and a build on push and PRs.
+
+Social preview
+
+- A simple Open Graph social preview image is available at `/public/og-image.svg`. Replace it with a branded image if you deploy to a public site so links show a nice preview on social platforms.
+
+## How to run the important checks locally
+
+1. Type-check only:
+
+```powershell
+npx tsc --noEmit
+```
+
+2. Full build (identical to CI):
+
+```powershell
+npm ci
+npm run build
+```
+
+3. Start dev server with functions (requires Netlify CLI):
+
+```powershell
+npm install -g netlify-cli
+netlify dev
+```
+
+## Next recommended improvements
+
+- Add screenshots and a short GIF for 2–3 featured projects (high impact).
+- Run Lighthouse and address accessibility issues reported by axe/lighthouse.
+- Add small unit tests and a Playwright e2e smoke test for the main flows.

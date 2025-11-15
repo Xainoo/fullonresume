@@ -113,6 +113,11 @@ body {
 .brand-text {
 	color: var(--text);
 	font-weight: 600;
+	/* allow the full brand name to show; avoid truncation */
+	max-width: none;
+	overflow: visible;
+	text-overflow: clip;
+	white-space: nowrap;
 }
 
 [data-theme="dark"] .brand-avatar {
@@ -834,7 +839,7 @@ button:focus, a:focus { outline: 3px solid rgba(59,130,246,0.14); outline-offset
 /* Navbar layout: left brand, center area, right controls.
 	 Use flex centering rather than absolute positioning to avoid overlap. */
 .brand-block { display: flex; align-items: center; gap: 0.5rem; flex: 0 0 auto; min-width: 240px; }
-.brand-text { max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.brand-text { max-width: none; overflow: visible; text-overflow: clip; white-space: nowrap; }
 
 /* The collapse wrapper consumes the middle space and centers its content (greeting). */
 .navbar-collapse-wrapper { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; gap: 1rem; position: relative; }
@@ -848,7 +853,7 @@ button:focus, a:focus { outline: 3px solid rgba(59,130,246,0.14); outline-offset
 /* Slightly tighten spacing for brand-contact dropdown on small widths */
 @media (max-width: 767px) {
 	.brand-block { min-width: 140px; }
-	.brand-text { max-width: 90px; }
+	.brand-text { max-width: none; }
 	.navbar-collapse-wrapper { justify-content: flex-start; }
 }
 

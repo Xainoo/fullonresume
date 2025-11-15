@@ -1,3 +1,12 @@
 {
-  "records": []
+  "records": [
+    {
+      "id": "tx_1762917733750_146",
+      "userId": 1,
+      "description": "dadasd",
+      "amount": -500,
+      "date": "2025-11-12T00:00:00.000Z",
+      "category": "General"
+    }
+  ]
 }
