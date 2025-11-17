@@ -1,21 +1,24 @@
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 import jwt from 'jsonwebtoken';
 
-const DB_DIR = path.resolve(process.cwd(), 'netlify', 'db');
-const DB_PATH = path.join(DB_DIR, 'finance.json');
-
-try { fs.mkdirSync(DB_DIR, { recursive: true }); } catch (e) { }
-if (!fs.existsSync(DB_PATH)) {
-  fs.writeFileSync(DB_PATH, JSON.stringify({ records: [] }, null, 2));
-}
+const DB_PATH = (function(){
+  const bundledDir = path.resolve(process.cwd(), 'netlify', 'db');
+  const bundledPath = path.join(bundledDir, 'finance.json');
+  try { fs.mkdirSync(bundledDir, { recursive: true }); fs.accessSync(bundledDir, fs.constants.W_OK); return bundledPath; } catch (e) {}
+  const tmpDir = path.join(os.tmpdir(), 'fullonresume', 'db');
+  try { fs.mkdirSync(tmpDir, { recursive: true }); } catch (e) {}
+  const target = path.join(tmpDir, 'finance.json');
+  try { if (!fs.existsSync(target) && fs.existsSync(bundledPath)) fs.copyFileSync(bundledPath, target); } catch (e) {}
+  try { if (!fs.existsSync(target)) fs.writeFileSync(target, JSON.stringify({ records: [] }, null, 2)); } catch (e) {}
+  return target;
+})();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me';
 
-function loadDB() {
-  try { return JSON.parse(fs.readFileSync(DB_PATH, 'utf-8')); } catch (e) { return { records: [] }; }
-}
-function saveDB(db) { fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2)); }
+function loadDB() { try { return JSON.parse(fs.readFileSync(DB_PATH, 'utf-8')); } catch (e) { return { records: [] }; } }
+function saveDB(db) { try { fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2)); } catch (e) { console.error('saveDB failed', e && e.message); } }
 
 export async function handler(event) {
   const { httpMethod, queryStringParameters } = event;
