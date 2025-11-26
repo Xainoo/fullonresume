@@ -2,131 +2,108 @@ FullOnResume — Single-repo Portfolio Workspace
 
 # FullOnResume — Single-repo Portfolio Workspace
 
-This repository is a Vite + React + TypeScript resume/portfolio demo that includes small serverless functions (Netlify Functions) for secure API access (weather, exchange rates, investment analysis). The README below explains how to get the project running locally, how to configure environment variables, how to test the exchange rates function used by the Expense Tracker, and how to deploy.
+This repo is a Vite + React + TypeScript portfolio/resume/demo web app with a small set of Netlify Functions and client features (finance dashboard, realtime chat, image classifier). The following instructions explain how to prepare your machine, run the project locally, configure environment variables, and verify the finance conversion behavior.
 
----
+## Prerequisites
 
-1. Install dependencies
+- Node.js (recommended LTS — e.g. 18.x or 20.x). Download: https://nodejs.org/
+- npm (bundled with Node.js) or Yarn/Pnpm if you prefer an alternative package manager.
+- (Optional) Netlify CLI if you want to run serverless functions locally: `npm install -g netlify-cli`.
+
+On Windows (PowerShell) example:
 
 ```powershell
+# install dependencies
 npm install
-```
 
-2. Start dev server
-
-```powershell
+# run dev server
 npm run dev
 ```
 
-3. Build for production
+## Project structure (high level)
+
+- `src/` — React + TypeScript frontend
+- `src/components/` — UI components (Finance dashboard, Transactions, Charts, AI playground)
+- `src/services/` — small client services, e.g. `rates.ts` and `finance.ts`
+- `netlify/functions/` — Netlify Functions used by the demo (Pusher trigger, finance persistence endpoints when authenticated)
+- `public/` — static assets
+
+## How the Finance feature works (important)
+
+- Transactions are recorded with an explicit `currency` field and the UI displays each transaction in its original currency.
+- The app uses a `displayCurrency` setting (default: EUR) to show aggregated totals (Balance, MonthlySummary, Budget) converted into the selected currency using exchange rates.
+- Rates are fetched from an external service with a local default fallback. The dashboard centralizes conversions so charts/totals are stable when the display currency changes.
+
+Important: recorded transactions should keep their original currency across page reloads. If you see transactions changing currency on refresh, it means the stored transaction objects are missing the `currency` field in your persistence layer (localStorage or server). The app now preserves currencies on save and does not overwrite fetched records on mount.
+
+## Environment variables
+
+- Client (Vite): put any client-only preview values in `.env` (keys must start with `VITE_`). These are optional.
+- Server (Netlify site env): if you deploy and want realtime chat, add these server variables in Netlify UI:
+  - `PUSHER_APP_ID`
+  - `PUSHER_KEY`
+  - `PUSHER_SECRET`
+  - `PUSHER_CLUSTER`
+
+Do NOT commit server secrets to your repo.
+
+## Common scripts
+
+- `npm run dev` — start Vite dev server
+- `npm run build` — build production bundle
+- `npm run preview` — preview production build locally (after `npm run build`)
+
+## Running with Netlify Functions locally
+
+1. Install `netlify-cli` globally: `npm install -g netlify-cli`
+2. Run: `netlify dev` — this will run Vite + your functions locally and expose function endpoints at `/.netlify/functions/*`.
+
+## Quick checklist to run locally
+
+1. Clone the repo and `cd` into the project folder.
+2. `npm install`
+3. (Optional) create `.env` from `.env.example` to set any Vite preview variables.
+4. `npm run dev` (or `netlify dev` if you want local functions)
+5. Open the app in your browser (default `http://localhost:5173` for Vite).
+
+## Debug panel & diagnosing rates
+
+- The Finance Dashboard includes a temporary debug panel (toggle "Show debug") that prints the current rates object, per-transaction per-unit rate (`1 ORIG → X DISPLAY`) and the converted totals. Use this to inspect values while switching the `displayCurrency` selector.
+- If the debug panel shows `(no rate)` or `1 (unknown) → USD 1.000000`, either the transaction currency is missing or the rates object is incomplete. You can open browser devtools → Application → Local Storage to inspect `finance_transactions_v1` and verify each transaction has a `currency` value.
+
+## Deployment (Netlify)
+
+- Deploy the repository to Netlify (connect via Git) and set the server-side environment variables described above. Netlify will build the app and publish the site. The Netlify Functions under `netlify/functions/` will be deployed automatically.
+
+## Troubleshooting
+
+- "Realtime disabled (no Pusher key)": check local `.env` preview keys or Netlify env vars.
+- Transactions appear in EUR after refresh: inspect persisted data in localStorage or your server responses — the persisted records must include a `currency` property. The app will not overwrite persisted currencies on load.
+- Rates unavailable message: the app will show a rates-unavailable notice only when it lacks any prior rates/fallbacks. Network failures will keep the last-known rates so the UI remains functional.
+
+## Development notes
+
+- Default display currency for aggregated views is now EUR.
+- Supported currencies in the demo: EUR, USD, PLN, DKK, GBP (GBP included).
+- Conversion helper is in `src/services/rates.ts`. It falls back to built-in defaults when the remote fetch fails.
+
+## Useful commands
 
 ```powershell
-npm run build
-```
-
-## Files / Structure
-
-- `src/main.tsx` — app entry, mounts `<App />`
-- `src/App.tsx` — routing (BrowserRouter + Routes)
-- `src/components/Layout.tsx` — top-level layout + navigation
-- `src/pages/*` — Home, Portfolio, Projects, ProjectDetail
-- `src/components/ListGroup.tsx` — existing component (can be removed later)
-
-## Image Analyzer and Realtime Chat
-
-This project includes two small interactive features showcased in the AI playground:
-
-- Image analyzer: The component uses TensorFlow.js for client-side image classification. Model loading is deferred (dynamic import) so it only downloads when you use the analyzer. The component supports uploading an image or using the webcam for live classification — no server-side inference required.
-- Realtime chat (Pusher + Netlify Functions): A small Netlify Function (`netlify/functions/pusher-trigger.js`) triggers Pusher server-side to broadcast chat messages. The client will subscribe to the `ai-chat` channel when a client-side realtime key is provided. If realtime keys are not present during local development, the chat falls back to a local-only preview mode so the UI remains usable.
-
-Deployment and env notes
-
-- Client-side preview: for a local preview of realtime features you may set client-side variables in a local `.env` file (Vite exposes vars that start with `VITE_`). These are optional and only needed for local realtime previews.
-- Server-side envs for Netlify Functions: configure `PUSHER_APP_ID`, `PUSHER_KEY`, `PUSHER_SECRET`, and `PUSHER_CLUSTER` in the Netlify site settings (these are not prefixed with `VITE_`). The function `pusher-trigger.js` uses these server-side envs to call Pusher.
-- For the image analyzer: no server envs are required. The browser downloads the TensorFlow.js model directly from the CDN when first used.
-
-Local testing checklist
-
-1. Copy `.env.example` to `.env` and fill in any keys you want to test.
-2. Start the dev server:
-
-```powershell
-npm run dev
-```
-
-3. Open the app in the browser. Use the Animal classifier: upload an image or click "Use camera" and allow camera permissions. Use the Realtime chat: if you filled Pusher keys and deployed Netlify function, you'll get full realtime behavior; otherwise the chat will operate locally for preview.
-
-Security note: Keep server-side Pusher secrets in Netlify's environment settings, not in a committed `.env` file.
-
-Netlify + Pusher quick deploy guide
-
-1. Create a free Pusher app at https://dashboard.pusher.com and note the App ID, Key, Secret and Cluster.
-
-2. In your Netlify site dashboard, go to Site settings → Build & deploy → Environment and add the following server-side variables (these must be set in Netlify UI):
-
-   - `PUSHER_APP_ID` = <your app id>
-   - `PUSHER_KEY` = <your app key>
-   - `PUSHER_SECRET` = <your app secret>
-   - `PUSHER_CLUSTER` = <your app cluster> (e.g. `eu`)
-
-   These env vars are used by `netlify/functions/pusher-trigger.js` when the function runs on Netlify.
-
-3. (Optional) For local client preview, add any Vite-prefixed client values in your local `.env` file (avoid committing secrets). These are only required if you want a full realtime preview locally.
-
-4. Deploy your site to Netlify. The Netlify Function `pusher-trigger` will be deployed from `netlify/functions/pusher-trigger.js` automatically. Once deployed, the client can POST to `/.netlify/functions/pusher-trigger` to broadcast messages to the `ai-chat` channel.
-
-5. Testing the function (deployed site):
-
-   - From client: open the app, go to AI playground and send a chat message. Other connected clients should receive it in realtime.
-   - From server/API: you can curl the function endpoint (replace with your site URL):
-
-```powershell
-curl -X POST "https://your-site.netlify.app/.netlify/functions/pusher-trigger" -H "Content-Type: application/json" -d '{"text":"hello","user":"tester"}'
-```
-
-    The function will respond with a JSON success or error message.
-
-Troubleshooting
-
-- If the client shows "Realtime disabled (no Pusher key)", ensure your local preview vars are set or that the site has the correct server-side Pusher credentials after deploy.
-- If the Netlify function returns 500, check Netlify function logs (Netlify dashboard) for missing or incorrect server-side Pusher credentials.
-
-## CV, Live demo and CI
-
-Quick actions to make this repo recruiter-ready:
-
-- Add a short custom domain for the live demo (Netlify makes this easy).
-- Use the built-in `/cv` page for a downloadable CV and on-site resume copy.
-- CI: this repo includes a basic GitHub Actions workflow at `.github/workflows/ci.yml` that runs TypeScript checks and a build on push and PRs.
-
-Social preview
-
-- A simple Open Graph social preview image is available at `/public/og-image.svg`. Replace it with a branded image if you deploy to a public site so links show a nice preview on social platforms.
-
-## How to run the important checks locally
-
-1. Type-check only:
-
-```powershell
+# type-check only
 npx tsc --noEmit
-```
 
-2. Full build (identical to CI):
-
-```powershell
+# full build
 npm ci
 npm run build
-```
 
-3. Start dev server with functions (requires Netlify CLI):
-
-```powershell
+# run dev server with local Netlify functions (optional)
 npm install -g netlify-cli
 netlify dev
 ```
 
-## Next recommended improvements
+If you'd like, I can add a small migration script to fix existing localStorage transactions that don't have a `currency` property (set them to EUR or ask for a prompt on first run).
 
-- Add screenshots and a short GIF for 2–3 featured projects (high impact).
-- Run Lighthouse and address accessibility issues reported by axe/lighthouse.
-- Add small unit tests and a Playwright e2e smoke test for the main flows.
+---
+
+If anything here is out of date for your workflow, tell me which section you'd like tightened (for example: exact Node version, preferred package manager, or adding CI commands) and I'll update the README accordingly.
