@@ -1,6 +1,30 @@
 {
   "records": [
     {
+      "id": "tx_1764119694049_7",
+      "userId": 0,
+      "description": "dadada",
+      "amount": 67,
+      "date": "2025-11-26T00:00:00.000Z",
+      "category": "General"
+    },
+    {
+      "id": "tx_1764119681809_950",
+      "userId": 0,
+      "description": "dasdasdas",
+      "amount": -123,
+      "date": "2025-11-26T00:00:00.000Z",
+      "category": "General"
+    },
+    {
+      "id": "tx_1764119676706_669",
+      "userId": 0,
+      "description": "sadasd",
+      "amount": -123,
+      "date": "2025-11-26T00:00:00.000Z",
+      "category": "General"
+    },
+    {
       "id": "tx_1762917733750_146",
       "userId": 1,
       "description": "dadasd",

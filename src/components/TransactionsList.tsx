@@ -53,7 +53,7 @@ export default function TransactionsList({
             <div
               className={t.amount < 0 ? "text-danger" : "text-success"}
               title={(() => {
-                const orig = `${t.currency || "PLN"} ${Math.abs(
+                const orig = `${t.currency || "EUR"} ${Math.abs(
                   t.amount
                 ).toFixed(2)}`;
                 if (rates && displayCurrency) {
@@ -75,37 +75,19 @@ export default function TransactionsList({
               })()}
             >
               {t.amount < 0 ? "-" : "+"}
-              {rates && displayCurrency
-                ? (() => {
-                    const display = convertAmount(
-                      t.amount,
-                      t.currency,
-                      displayCurrency,
-                      rates
-                    );
-                    try {
-                      return new Intl.NumberFormat(undefined, {
-                        style: "currency",
-                        currency: displayCurrency || t.currency || "PLN",
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      }).format(Math.abs(display));
-                    } catch {
-                      return Math.abs(display).toFixed(2);
-                    }
-                  })()
-                : (() => {
-                    try {
-                      return new Intl.NumberFormat(undefined, {
-                        style: "currency",
-                        currency: t.currency || "PLN",
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      }).format(Math.abs(t.amount));
-                    } catch {
-                      return Math.abs(t.amount).toFixed(2);
-                    }
-                  })()}
+              {/* Always display the original amount/currency in the list. */}
+              {(() => {
+                try {
+                  return new Intl.NumberFormat(undefined, {
+                    style: "currency",
+                    currency: t.currency || "EUR",
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }).format(Math.abs(t.amount));
+                } catch {
+                  return Math.abs(t.amount).toFixed(2);
+                }
+              })()}
             </div>
             {onEdit && (
               <button

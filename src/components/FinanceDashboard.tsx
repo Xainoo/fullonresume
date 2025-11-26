@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import PageHeader from "./PageHeader";
 import TransactionsList from "./TransactionsList";
 import TransactionForm from "./TransactionForm";
@@ -14,7 +14,8 @@ import {
 } from "../services/finance";
 import type { Transaction } from "../services/finance";
 import { fetchBudgets, type BudgetRecord } from "../services/finance";
-import { fetchRates } from "../services/rates";
+import { convertAmount } from "../services/rates";
+import { fetchRates, SUPPORTED_CURRENCIES } from "../services/rates";
 import type { Rates } from "../services/rates";
 import { useTranslation } from "../i18n";
 import ConfirmModal from "./ConfirmModal";
@@ -34,16 +35,71 @@ export default function FinanceDashboard() {
   const [ratesError, setRatesError] = useState<boolean>(false);
   const [displayCurrency, setDisplayCurrency] = useState<string>(() => {
     try {
-      return (localStorage.getItem("display_currency") as string) || "PLN";
+      return (localStorage.getItem("display_currency") as string) || "EUR";
     } catch {
-      return "PLN";
+      return "EUR";
     }
   });
+  const [showDebug, setShowDebug] = useState(false);
+  const fetchIdRef = useRef(0);
+
+  // local fallback rates (kept in-sync with services/rates DEFAULT_RATES)
+  const LOCAL_DEFAULT_RATES: Record<string, number> = {
+    EUR: 1,
+    USD: 1.1,
+    PLN: 4.6,
+    DKK: 7.44,
+    GBP: 0.86,
+  };
+
+  function normalizeRatesToBase(
+    input: Rates | Record<string, number>,
+    base: string
+  ): Rates {
+    const out: Rates = {} as Rates;
+    const baseUp = base.toUpperCase();
+    // copy and uppercase keys, coerce to number
+    Object.keys(input).forEach((k) => {
+      const key = k.toUpperCase();
+      // @ts-ignore - input can be Rates or simple record
+      const val = (input as any)[k];
+      out[key] = typeof val === "number" ? val : Number(val || NaN);
+    });
+
+    // try to determine the source base (if provided on the input)
+    const sourceBase = ((input as Rates).base || undefined) as
+      | string
+      | undefined;
+
+    // ensure base value present (if not, we'll create it as 1)
+    out[baseUp] = out[baseUp] ?? 1;
+
+    // If the rates were provided relative to a different base, normalize them
+    // so that `out` becomes relative to `baseUp` (i.e. out[baseUp] === 1).
+    if (sourceBase && sourceBase.toUpperCase() !== baseUp) {
+      // prefer the direct value for the desired base if present, otherwise
+      // derive a divisor from the source base value.
+      const src = sourceBase.toUpperCase();
+      const divisor = out[baseUp] ?? out[src] ?? 1;
+      Object.keys(out).forEach((k) => {
+        if (k === "base") return;
+        out[k] = out[k] / divisor;
+      });
+    } else if (!sourceBase) {
+      // No declared source base — assume the input rates were already
+      // expressed in their own base and just ensure numeric values.
+      // If the desired base isn't present we'll keep out[baseUp] === 1
+      // and other values will be interpreted relative to that.
+    }
+
+    out.base = baseUp;
+    return out;
+  }
 
   useEffect(() => {
     setLoading(true);
     fetchTransactions()
-      .then((r) => setTransactions(r))
+      .then((r) => setTransactions(r || []))
       .catch((e) => setError(String(e)))
       .finally(() => setLoading(false));
   }, []);
@@ -52,16 +108,95 @@ export default function FinanceDashboard() {
   useEffect(() => {
     fetchBudgets().then((b) => setBudgets(b));
     setRatesLoading(true);
+    const hadRatesBefore = !!rates;
     setRatesError(false);
-    fetchRates(displayCurrency)
-      .then((r) => {
-        setRates(r);
-      })
-      .catch(() => {
-        setRates(undefined as unknown as Rates);
-        setRatesError(true);
-      })
-      .finally(() => setRatesLoading(false));
+
+    // optimistic: compute an immediate, normalized rates object so UI can
+    // convert consistently right away while we fetch the authoritative rates.
+    try {
+      if (rates) {
+        const immediate = normalizeRatesToBase(rates, displayCurrency);
+        setRates(immediate);
+      } else {
+        // build from local defaults
+        const fallback: Record<string, number> = {};
+        Object.keys(LOCAL_DEFAULT_RATES).forEach((k) => {
+          fallback[k] =
+            LOCAL_DEFAULT_RATES[k as keyof typeof LOCAL_DEFAULT_RATES];
+        });
+        const immediate = normalizeRatesToBase(
+          fallback as Rates,
+          displayCurrency
+        );
+        setRates(immediate);
+      }
+    } catch (err) {
+      console.debug(
+        "FinanceDashboard: immediate rates normalization failed",
+        err
+      );
+    }
+
+    const thisFetchId = ++fetchIdRef.current;
+    (async () => {
+      try {
+        const r = await fetchRates(displayCurrency);
+        if (fetchIdRef.current !== thisFetchId) {
+          console.debug("FinanceDashboard: ignored out-of-date rates result", {
+            for: displayCurrency,
+          });
+          return;
+        }
+        // normalize fetched rates into numeric, uppercase keys and ensure base
+        let normalized: Rates;
+        try {
+          normalized = normalizeRatesToBase(r, displayCurrency);
+        } catch (err) {
+          console.warn(
+            "FinanceDashboard: failed to normalize fetched rates, keeping previous",
+            err
+          );
+          if (!hadRatesBefore) setRatesError(true);
+          return;
+        }
+
+        // validate normalized rates: ensure we have the displayCurrency and at least
+        // one other supported currency present as numeric values.
+        const present = SUPPORTED_CURRENCIES.filter(
+          (c) => typeof normalized[c] === "number" && !isNaN(normalized[c])
+        );
+        if (!present.includes(displayCurrency) || present.length < 2) {
+          console.warn(
+            "FinanceDashboard: fetched rates seem incomplete, keeping previous rates",
+            {
+              displayCurrency,
+              present,
+              normalized,
+            }
+          );
+          if (!hadRatesBefore) setRatesError(true);
+          return;
+        }
+
+        setRates(normalized);
+        setRatesError(false);
+      } catch (e) {
+        if (fetchIdRef.current !== thisFetchId) return;
+        // keep the immediate/local rates instead of clearing them
+        console.warn(
+          "FinanceDashboard: rates fetch failed, keeping immediate rates",
+          e
+        );
+        if (!hadRatesBefore) setRatesError(true);
+      } finally {
+        if (fetchIdRef.current !== thisFetchId) return;
+        setRatesLoading(false);
+      }
+    })();
+    return () => {
+      // invalidate this fetch
+      fetchIdRef.current++;
+    };
   }, [displayCurrency]);
 
   function scrollToForm() {
@@ -101,12 +236,18 @@ export default function FinanceDashboard() {
       const exists = transactions.some((t) => t.id === tx.id);
       if (exists) {
         saved = await updateTransaction(tx);
+        // ensure currency preserved immediately
+        saved.currency =
+          saved.currency ?? tx.currency ?? displayCurrency ?? "EUR";
         setTransactions((s) =>
           s.map((it) => (it.id === saved.id ? saved : it))
         );
         setEditing(null);
       } else {
         saved = await saveTransaction(tx);
+        // ensure saved record has currency (some backends may omit it)
+        saved.currency =
+          saved.currency ?? tx.currency ?? displayCurrency ?? "EUR";
         setTransactions((s) => [saved, ...s]);
       }
     } catch (e) {
@@ -144,13 +285,35 @@ export default function FinanceDashboard() {
     setLoading(true);
     try {
       const imported = await importCsv(file);
-      setTransactions((s) => [...imported, ...s]);
+      const normalized = imported.map((tx) => ({
+        ...tx,
+        currency: tx.currency ?? displayCurrency ?? "EUR",
+      }));
+      setTransactions((s) => [...normalized, ...s]);
     } catch (e) {
       setError(String(e));
     } finally {
       setLoading(false);
     }
   }
+
+  // precompute converted amounts for balance/summary to avoid races
+  const convertedTransactions = transactions.map((t) => {
+    let converted = t.amount;
+    try {
+      converted = convertAmount(
+        t.amount,
+        t.currency,
+        displayCurrency,
+        rates ?? undefined
+      );
+    } catch {
+      converted = t.amount;
+    }
+    return { ...t, convertedAmount: converted } as Transaction & {
+      convertedAmount: number;
+    };
+  });
 
   return (
     <div className="container py-4">
@@ -163,6 +326,7 @@ export default function FinanceDashboard() {
               transactions={transactions}
               rates={rates ?? undefined}
               displayCurrency={displayCurrency}
+              convertedTransactions={convertedTransactions}
             />
           </div>
 
@@ -205,7 +369,131 @@ export default function FinanceDashboard() {
               budgets={budgets ?? undefined}
               rates={rates ?? undefined}
               displayCurrency={displayCurrency}
+              convertedTransactions={convertedTransactions}
             />
+          </div>
+
+          {/* Debug panel: temporary, helps diagnose conversion / rates */}
+          <div className="mb-3">
+            <button
+              className="btn btn-sm btn-outline-secondary mb-2"
+              onClick={() => setShowDebug((s) => !s)}
+            >
+              {showDebug ? "Hide debug" : "Show debug"}
+            </button>
+            {showDebug && (
+              <div className="card p-2">
+                <div className="small text-muted mb-1">
+                  Display currency: {displayCurrency}
+                </div>
+                <div className="small text-muted mb-1">Rates:</div>
+                <pre style={{ maxHeight: 120, overflow: "auto" }}>
+                  {JSON.stringify(rates ?? null, null, 2)}
+                </pre>
+                <div className="small text-muted mt-2">
+                  Per-transaction conversion (to {displayCurrency}):
+                </div>
+                <table className="table table-sm">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Orig</th>
+                      <th>Rate</th>
+                      <th>Converted</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {transactions.map((tx) => {
+                      const conv = (() => {
+                        try {
+                          return rates
+                            ? convertAmount(
+                                tx.amount,
+                                tx.currency,
+                                displayCurrency,
+                                rates
+                              )
+                            : NaN;
+                        } catch {
+                          return NaN;
+                        }
+                      })();
+                      // compute per-unit conversion (1 orig -> X display)
+                      const perUnit = (() => {
+                        try {
+                          return rates
+                            ? convertAmount(
+                                1,
+                                tx.currency,
+                                displayCurrency,
+                                rates
+                              )
+                            : NaN;
+                        } catch {
+                          return NaN;
+                        }
+                      })();
+                      if (
+                        !isNaN(perUnit) &&
+                        tx.currency?.toUpperCase() !==
+                          displayCurrency?.toUpperCase() &&
+                        Math.abs(perUnit - 1) < 1e-8
+                      ) {
+                        console.warn(
+                          "FinanceDashboard: suspicious per-unit conversion (≈1)",
+                          {
+                            tx,
+                            perUnit,
+                            conv,
+                            displayCurrency,
+                          }
+                        );
+                      }
+                      return (
+                        <tr key={tx.id}>
+                          <td>{(tx.date || "").slice(0, 10)}</td>
+                          <td>{`${tx.currency || "PLN"} ${tx.amount.toFixed(
+                            2
+                          )}`}</td>
+                          <td>
+                            {isNaN(perUnit)
+                              ? "(no rate)"
+                              : `1 ${
+                                  tx.currency || "(unknown)"
+                                } → ${displayCurrency} ${perUnit.toFixed(6)}`}
+                          </td>
+                          <td>
+                            {isNaN(conv)
+                              ? "(no rates)"
+                              : `${displayCurrency} ${conv.toFixed(2)}`}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                <div className="small text-muted">
+                  Total converted:{" "}
+                  {(() => {
+                    try {
+                      if (!rates) return "(no rates)";
+                      const total = transactions.reduce((acc, tx) => {
+                        const v = convertAmount(
+                          tx.amount,
+                          tx.currency,
+                          displayCurrency,
+                          rates
+                        );
+                        return acc + v;
+                      }, 0);
+                      return `${displayCurrency} ${total.toFixed(2)}`;
+                    } catch {
+                      return "(error)";
+                    }
+                  })()}
+                </div>
+              </div>
+            )}
           </div>
 
           <TransactionsList
