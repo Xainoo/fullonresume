@@ -23,7 +23,7 @@ export default function BudgetEditor({
   const [selected, setSelected] = useState<string>(() => monthKey(new Date()));
   const [amount, setAmount] = useState<string>("");
 
-  const [currency, setCurrency] = useState<string>("PLN");
+  const [currency, setCurrency] = useState<string>("EUR");
   const { t } = useTranslation();
   // persist preferred budget currency
   useEffect(() => {
@@ -43,7 +43,7 @@ export default function BudgetEditor({
   useEffect(() => {
     const v = budgets[selected];
     setAmount(v !== undefined ? String(v.amount ?? v) : "");
-    setCurrency(v !== undefined && v.currency ? v.currency : "PLN");
+    setCurrency(v !== undefined && v.currency ? v.currency : "EUR");
   }, [selected, budgets]);
 
   const monthsArr = useMemo(() => {

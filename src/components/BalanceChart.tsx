@@ -24,23 +24,35 @@ function miniSparkline(values: number[]) {
 export default function BalanceChart({
   transactions,
   rates,
-  displayCurrency = "PLN",
+  displayCurrency = "EUR",
+  convertedTransactions,
 }: {
   transactions: Transaction[];
   rates?: Rates;
   displayCurrency?: string;
+  convertedTransactions?: Array<{ date: string; convertedAmount: number }>;
 }) {
   const { t } = useTranslation();
   const sorted = [...transactions].sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   );
   let balance = 0;
-  const series = sorted.map((t) => {
-    const amt = rates
-      ? convertAmount(t.amount, t.currency, displayCurrency, rates)
-      : t.amount;
-    return (balance += amt);
-  });
+  const series = (
+    convertedTransactions
+      ? // build series from precomputed converted transactions
+        [...(convertedTransactions || [])]
+          .sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          )
+          .map((ct) => (balance += ct.convertedAmount))
+      : // fallback: compute from raw transactions using rates
+        sorted.map((t) => {
+          const amt = rates
+            ? convertAmount(t.amount, t.currency, displayCurrency, rates)
+            : t.amount;
+          return (balance += amt);
+        })
+  ) as number[];
   if (series.length === 0)
     return <div className="text-muted">No chart data</div>;
   const latest = series[series.length - 1] || 0;
@@ -48,7 +60,7 @@ export default function BalanceChart({
     try {
       return new Intl.NumberFormat(undefined, {
         style: "currency",
-        currency: displayCurrency || "PLN",
+        currency: displayCurrency || "EUR",
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       }).format(v);

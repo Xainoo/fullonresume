@@ -12,7 +12,7 @@ function fmt(v: number, currency?: string) {
   try {
     return new Intl.NumberFormat(undefined, {
       style: "currency",
-      currency: currency || "PLN",
+      currency: currency || "EUR",
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(v);
@@ -26,13 +26,15 @@ export default function MonthlySummary({
   months = 6,
   budgets,
   rates,
-  displayCurrency = "PLN",
+  displayCurrency = "EUR",
+  convertedTransactions,
 }: {
   transactions: Transaction[];
   months?: number;
   budgets?: BudgetsMap;
   rates?: Rates;
   displayCurrency?: string;
+  convertedTransactions?: Array<{ date: string; convertedAmount: number }>;
 }) {
   if (!transactions || transactions.length === 0)
     return <div className="text-muted">No monthly data</div>;
@@ -41,14 +43,31 @@ export default function MonthlySummary({
   // keep both net totals and expense totals (sum of negative amounts)
   const netMap = new Map<string, number>();
   const expenseMap = new Map<string, number>();
-  transactions.forEach((t) => {
-    const d = new Date(t.date);
-    const k = monthKey(d);
-    netMap.set(k, (netMap.get(k) || 0) + t.amount);
-    if (t.amount < 0) {
-      expenseMap.set(k, (expenseMap.get(k) || 0) + Math.abs(t.amount));
-    }
-  });
+  // Use precomputed convertedTransactions when available to avoid races
+  if (convertedTransactions && convertedTransactions.length > 0) {
+    convertedTransactions.forEach((ct) => {
+      const d = new Date(ct.date);
+      const k = monthKey(d);
+      const amt = ct.convertedAmount;
+      netMap.set(k, (netMap.get(k) || 0) + amt);
+      if (amt < 0) {
+        expenseMap.set(k, (expenseMap.get(k) || 0) + Math.abs(amt));
+      }
+    });
+  } else {
+    transactions.forEach((t) => {
+      const d = new Date(t.date);
+      const k = monthKey(d);
+      // convert amount to display currency when rates are available
+      const amt = rates
+        ? convertAmount(t.amount, t.currency, displayCurrency, rates)
+        : t.amount;
+      netMap.set(k, (netMap.get(k) || 0) + amt);
+      if (amt < 0) {
+        expenseMap.set(k, (expenseMap.get(k) || 0) + Math.abs(amt));
+      }
+    });
+  }
 
   // pick last N months
   // ensure contiguous months up to latest

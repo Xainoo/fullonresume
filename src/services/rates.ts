@@ -36,15 +36,28 @@ export async function fetchRates(base = "EUR"): Promise<Rates> {
   }
 }
 
-export function convertAmount(amount: number, from: string | undefined, to: string, rates: Rates) {
-  if (!from) from = rates.base || "EUR";
-  from = from.toUpperCase();
-  to = to.toUpperCase();
+export function convertAmount(
+  amount: number,
+  from: string | undefined,
+  to: string,
+  rates?: Rates | null
+) {
+  // normalize
+  from = (from || (rates && rates.base) || "EUR").toUpperCase();
+  to = (to || "EUR").toUpperCase();
   if (from === to) return amount;
-  // convert from -> EUR -> to using rates where rates[currency] = 1 unit of currency per base? Our rates are relative to base
+
+  // If rates are not provided, fall back to DEFAULT_RATES (EUR-based)
+  if (!rates) {
+    const rateFrom = DEFAULT_RATES[from] ?? 1;
+    const rateTo = DEFAULT_RATES[to] ?? 1;
+    const valueInBase = amount / rateFrom;
+    return valueInBase * rateTo;
+  }
+
+  // convert using provided rates (rates are relative to rates.base)
   const rateFrom = rates[from] ?? (DEFAULT_RATES[from] ?? 1);
   const rateTo = rates[to] ?? (DEFAULT_RATES[to] ?? 1);
-  // amount expressed in 'from' -> convert to base: value_in_base = amount / rateFrom; then to target: value_in_to = value_in_base * rateTo
   const valueInBase = amount / rateFrom;
   const valueInTo = valueInBase * rateTo;
   return valueInTo;
