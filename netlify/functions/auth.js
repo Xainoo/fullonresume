@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -7,19 +8,49 @@ import jwt from 'jsonwebtoken';
 // modules (better-sqlite3). This keeps the dev experience simple. For
 // production, migrate to a managed DB.
 
-const DB_DIR = path.resolve(process.cwd(), 'netlify', 'db');
-const DB_PATH = path.join(DB_DIR, 'auth.json');
+// Use project db dir in dev, but when running in Netlify (read-only bundle) fall
+// back to the OS temp directory (/tmp). If falling back, copy the bundled DB
+// file to the temp dir so the function has initial data.
+function resolveDbPath(filename) {
+  const bundledDir = path.resolve(process.cwd(), 'netlify', 'db');
+  const bundledPath = path.join(bundledDir, filename);
+  // prefer bundled dir when writable (local dev)
+  try {
+    fs.mkdirSync(bundledDir, { recursive: true });
+    fs.accessSync(bundledDir, fs.constants.W_OK);
+    return bundledPath;
+  } catch (e) {
+    // not writable (Netlify functions are read-only), fall back to tmp
+  }
 
-try {
-  fs.mkdirSync(DB_DIR, { recursive: true });
-} catch (e) {
-  // ignore
+  const tmpDir = path.join(os.tmpdir(), 'fullonresume', 'db');
+  try {
+    fs.mkdirSync(tmpDir, { recursive: true });
+  } catch (e) {
+    // ignore
+  }
+  const target = path.join(tmpDir, filename);
+  // If target doesn't exist but bundled file does, copy it for initial data
+  try {
+    if (!fs.existsSync(target) && fs.existsSync(bundledPath)) {
+      fs.copyFileSync(bundledPath, target);
+    }
+  } catch (e) {
+    // ignore copy errors
+  }
+  // Ensure file exists
+  if (!fs.existsSync(target)) {
+    try {
+      fs.writeFileSync(target, JSON.stringify({ users: [], lastId: 0 }, null, 2));
+    } catch (e) {
+      // last resort: try to create in bundled path (may throw elsewhere)
+      try { fs.writeFileSync(bundledPath, JSON.stringify({ users: [], lastId: 0 }, null, 2)); } catch (__) {}
+    }
+  }
+  return target;
 }
 
-// Ensure DB file exists
-if (!fs.existsSync(DB_PATH)) {
-  fs.writeFileSync(DB_PATH, JSON.stringify({ users: [], lastId: 0 }, null, 2));
-}
+const DB_PATH = resolveDbPath('auth.json');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me';
 // New env var name for admin creation code
@@ -40,7 +71,13 @@ function loadDB() {
 }
 
 function saveDB(db) {
-  fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+  try {
+    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+  } catch (e) {
+    // writing can fail on read-only FS; ignore so we don't crash the function
+    // caller will get a 500 if persistence is required elsewhere
+    console.error('saveDB failed', e && e.message);
+  }
 }
 
 function findUserByEmail(db, email) {

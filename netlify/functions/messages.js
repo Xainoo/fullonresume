@@ -1,18 +1,39 @@
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 
-const DB_DIR = path.resolve(process.cwd(), 'netlify', 'db');
-const DB_PATH = path.join(DB_DIR, 'messages.json');
-
-try { fs.mkdirSync(DB_DIR, { recursive: true }); } catch (e) { }
-if (!fs.existsSync(DB_PATH)) {
-  fs.writeFileSync(DB_PATH, JSON.stringify({ records: [] }, null, 2));
+function resolveDbPath(filename, defaultBody = { records: [] }) {
+  const bundledDir = path.resolve(process.cwd(), 'netlify', 'db');
+  const bundledPath = path.join(bundledDir, filename);
+  try {
+    fs.mkdirSync(bundledDir, { recursive: true });
+    fs.accessSync(bundledDir, fs.constants.W_OK);
+    return bundledPath;
+  } catch (e) {
+    // fall back to tmp
+  }
+  const tmpDir = path.join(os.tmpdir(), 'fullonresume', 'db');
+  try { fs.mkdirSync(tmpDir, { recursive: true }); } catch (e) {}
+  const target = path.join(tmpDir, filename);
+  try {
+    if (!fs.existsSync(target) && fs.existsSync(bundledPath)) {
+      fs.copyFileSync(bundledPath, target);
+    }
+  } catch (e) {}
+  if (!fs.existsSync(target)) {
+    try { fs.writeFileSync(target, JSON.stringify(defaultBody, null, 2)); } catch (e) {}
+  }
+  return target;
 }
+
+const DB_PATH = resolveDbPath('messages.json', { records: [] });
 
 function loadDB() {
   try { return JSON.parse(fs.readFileSync(DB_PATH, 'utf-8')); } catch (e) { return { records: [] }; }
 }
-function saveDB(db) { fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2)); }
+function saveDB(db) {
+  try { fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2)); } catch (e) { console.error('saveDB failed', e && e.message); }
+}
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_KEY;
