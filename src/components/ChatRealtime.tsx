@@ -83,46 +83,88 @@ export default function ChatRealtime() {
     const opts: Record<string, unknown> = { useTLS: true };
     if (PUSHER_CLUSTER)
       (opts as Record<string, unknown>).cluster = PUSHER_CLUSTER;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const pusher = new Pusher(PUSHER_KEY as string, opts as any);
-    const channel = pusher.subscribe("ai-chat");
-    channel.bind("message", (data: unknown) => {
-      // dedupe incoming messages to avoid duplicates when using optimistic echo
-      setMessages((m) => {
-        const d = data as {
-          id?: string;
-          user?: string;
-          text?: string;
-          ts?: number;
-        };
-        const incoming: Message = {
-          id: d.id,
-          user: d.user || "bot",
-          text: d.text || "",
-          ts: d.ts || Date.now(),
-        };
-        // if incoming has an id, prefer id-based dedupe
-        const duplicate = incoming.id
-          ? m.some((msg) => msg.id === incoming.id)
-          : m.some(
-              (msg) =>
-                msg.user === incoming.user &&
-                msg.text === incoming.text &&
-                Math.abs((msg.ts || 0) - incoming.ts) < 5000
-            );
-        if (duplicate) return m;
-        return [...m, incoming];
-      });
-    });
-    return () => {
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const pusher = new Pusher(PUSHER_KEY as string, opts as any);
+      const channel = pusher.subscribe("ai-chat");
+
+      // Bind connection events for better diagnostics on deployed site
       try {
-        channel.unbind_all();
-        pusher.unsubscribe("ai-chat");
-        pusher.disconnect();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const conn = pusher.connection as any;
+        conn.bind("error", (err: unknown) => {
+          console.warn("Pusher connection error:", err);
+          setMessages((m) => [
+            ...m,
+            {
+              user: "system",
+              text: "Realtime connection error (see console).",
+              ts: Date.now(),
+            },
+          ]);
+        });
+        conn.bind("connected", () => {
+          setMessages((m) => [
+            ...m,
+            { user: "system", text: "Realtime connected.", ts: Date.now() },
+          ]);
+        });
       } catch {
-        // ignore
+        // ignore if connection binding fails
       }
-    };
+
+      channel.bind("message", (data: unknown) => {
+        // dedupe incoming messages to avoid duplicates when using optimistic echo
+        setMessages((m) => {
+          const d = data as {
+            id?: string;
+            user?: string;
+            text?: string;
+            ts?: number;
+          };
+          const incoming: Message = {
+            id: d.id,
+            user: d.user || "bot",
+            text: d.text || "",
+            ts: d.ts || Date.now(),
+          };
+          // if incoming has an id, prefer id-based dedupe
+          const duplicate = incoming.id
+            ? m.some((msg) => msg.id === incoming.id)
+            : m.some(
+                (msg) =>
+                  msg.user === incoming.user &&
+                  msg.text === incoming.text &&
+                  Math.abs((msg.ts || 0) - incoming.ts) < 5000
+              );
+          if (duplicate) return m;
+          return [...m, incoming];
+        });
+      });
+
+      return () => {
+        try {
+          channel.unbind_all();
+          pusher.unsubscribe("ai-chat");
+          pusher.disconnect();
+        } catch {
+          // ignore
+        }
+      };
+    } catch (err) {
+      // If creating Pusher fails (e.g. malformed key), show a system message
+      console.error("Failed to init Pusher client:", err);
+      setMessages((m) => [
+        ...m,
+        {
+          user: "system",
+          text: "Realtime initialization failed (see console).",
+          ts: Date.now(),
+        },
+      ]);
+      return;
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
