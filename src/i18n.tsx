@@ -168,6 +168,15 @@ const translations: Record<Lang, Record<string, string>> = {
     admin_confirm_delete: "Are you sure you want to delete this user?",
     admin_cannot_delete_admin: "Cannot delete admin user",
     admin_delete: "Delete",
+    admin_users_empty: "No users to display",
+    admin_cannot_delete_last_self: "Cannot delete the last admin",
+    admin_confirm_title: "Confirm delete",
+    confirm_delete: "Delete transaction",
+    confirm_delete_msg:
+      "Do you really want to delete this transaction? This cannot be undone.",
+    delete: "Delete",
+    cancel: "Cancel",
+    no_recent: "No expenses",
     loading: "Loading...",
   },
   pl: {
@@ -328,6 +337,15 @@ const translations: Record<Lang, Record<string, string>> = {
     admin_confirm_delete: "Czy na pewno chcesz usunąć tego użytkownika?",
     admin_cannot_delete_admin: "Nie można usunąć administratora",
     admin_delete: "Usuń",
+    admin_users_empty: "Brak użytkowników do wyświetlenia",
+    admin_cannot_delete_last_self: "Nie można usunąć ostatniego administratora",
+    admin_confirm_title: "Potwierdź usunięcie",
+    confirm_delete: "Usuń transakcję",
+    confirm_delete_msg:
+      "Czy na pewno chcesz usunąć tę transakcję? Operacji nie można cofnąć.",
+    delete: "Usuń",
+    cancel: "Anuluj",
+    no_recent: "Brak wydatków",
     loading: "Ładowanie...",
   },
 };
